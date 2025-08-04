@@ -1,0 +1,67 @@
+.box{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100dvh;
+  user-select: none;
+  overflow-y: hidden;
+}
+.content{
+  gap: 1rem;
+  font-size: large;
+  width: 500px;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  color: white;
+}
+
+
+.maquetado {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top:30%;
+  width: 300px;
+  gap: 1rem;
+}
+.maquetado *{
+  height: 40px;
+}
+.maquetado input{
+  padding-left:7px  ;
+}
+.maquetado button{
+  font-size: large;
+}
+.maquetado small{
+  color: red;
+}
+.contrasena {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.contrasena input {
+  flex: 1;
+}
+
+.contrasena button {
+  margin-left: -34px;
+  margin-right: 10px;
+  margin-top: 10px;
+  background: none;
+  border: none;
+}
+
+.confirm {
+  display: flex;
+  gap: 1rem;
+}
+.confirm a{
+  color: white;
+}
+
+

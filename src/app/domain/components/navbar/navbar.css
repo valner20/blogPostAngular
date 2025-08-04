@@ -1,0 +1,68 @@
+.navbar {
+  position: fixed;
+  width: 100vw;
+  top: 15px;
+  user-select: none;
+}
+
+.image img {
+  width: 25rem;
+  height: 6.4rem;
+}
+
+.links {
+  display: flex;
+  position: absolute;
+  right: 100px;
+  font-size: x-large;
+}
+
+.links a {
+  color: white;
+  padding: 15px;
+  text-decoration: none;
+}
+
+.rayita {
+  height: 50px;
+  width: 1px;
+  background-color: white;
+}
+
+.username {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #ffffffd9;
+  margin: 1rem;
+  text-shadow: 0 1px 2px #00000050;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 1.3rem;
+}
+
+.logout {
+  background: none;
+  border: 1px solid #92929250;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 2rem;
+  font-weight: 500;
+  transition: 0.2s, border 0.2s;
+}
+
+.logout:hover {
+  background: #ffffff10;
+  border-color: #ffffff80;
+}
+
+@media (max-width: 700px) {
+  .image img {
+    display: none;
+  }
+
+  .links {
+    flex-wrap: wrap;
+    right: 0;
+  }
+}

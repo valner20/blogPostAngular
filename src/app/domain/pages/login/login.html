@@ -1,0 +1,37 @@
+
+<div class="box">
+  <div class="content">
+    <form [formGroup]="form" (ngSubmit)="login()" class="maquetado">
+      <h2>Login</h2>
+      <input
+        type="email"
+        formControlName="email"
+        placeholder="email" />
+      <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+        <small *ngIf="form.get('email')?.errors?.['required']">Campo obligatorio</small>
+        <small *ngIf="form.get('email')?.errors?.['email']">Correo no válido</small>
+      </div>
+      <div class="contrasena">
+        <input
+        [type]="verContrasena ? 'text': 'password'"
+        formControlName="password"
+        placeholder="password" />
+        <button type="button" (click)="contrasena()" mat-icon-button> <mat-icon>{{ verContrasena ? 'visibility_off' : 'visibility' }}</mat-icon> </button>
+      </div>
+
+      <div *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+        <small *ngIf="form.get('password')?.errors?.['required']">Campo obligatorio</small>
+      </div>
+      <div *ngIf="error">
+        <small *ngIf="cantlog">Correo o contraseña  incorrectos</small>
+        <small *ngIf="serverStuck">Ocurrio algo inesperado </small>
+      </div>
+      <button type="submit" [disabled]="form.invalid">Submit</button>
+      <button type="button">Cancel</button>
+      <div class="confirm">
+        <p>Don't have an account?</p><a [routerLink]="['/registrar']">Register</a>
+      </div>
+
+    </form>
+  </div>
+</div>

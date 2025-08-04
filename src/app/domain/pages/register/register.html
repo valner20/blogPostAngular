@@ -1,0 +1,52 @@
+<div class="box">
+  <div class="content">
+    <form [formGroup]="form" (ngSubmit)="create()" class="maquetado">
+      <h2>Register</h2>
+
+      <input
+        type="text"
+        formControlName="username"
+        placeholder="username" />
+      <div *ngIf="form.get('username')?.touched && form.get('username')?.invalid">
+        <small *ngIf="form.get('username')?.errors?.['required']">Campo obligatorio</small>
+        <small *ngIf="form.get('username')?.errors?.['usernameError']">El nombre ya existe</small>
+      </div>
+
+      <input
+        type="email"
+        formControlName="email"
+        placeholder="email" />
+      <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+        <small *ngIf="form.get('email')?.errors?.['required']">Campo obligatorio</small>
+        <small *ngIf="form.get('email')?.errors?.['email']">Correo no válido</small>
+        <small *ngIf="form.get('email')?.errors?.['emailError']">El correo ya existe</small>
+      </div>
+
+      <input
+        type="password"
+        formControlName="password"
+        placeholder="password" />
+      <div *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+        <small *ngIf="form.get('password')?.errors?.['required']">Campo obligatorio</small>
+      </div>
+
+      <input
+        type="password"
+        formControlName="confirm"
+        placeholder="confirm password" />
+      <div *ngIf="form.get('confirm')?.touched && form.get('confirm')?.errors?.['required']">
+        <small>Campo obligatorio</small>
+      </div>
+      <div *ngIf="form.errors?.['error'] && form.get('confirm')?.touched">
+        <small>Las contraseñas no coinciden</small>
+      </div>
+
+      <button type="submit"  >Submit</button>
+      <button type="button">Cancel</button>
+
+      <div class="confirm">
+        <p>Have an account? </p><a [routerLink]="['/login']">Log in</a>
+      </div>
+    </form>
+  </div>
+</div>

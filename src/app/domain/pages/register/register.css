@@ -1,0 +1,47 @@
+.box{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh;
+  user-select: none;
+}
+.content{
+  gap: 1rem;
+  font-size: large;
+  width: 500px;
+  height: 800px;
+  display: flex;
+  justify-content: center;
+  color: white;
+}
+
+
+.maquetado {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top:30%;
+  width: 300px;
+  gap: 1rem;
+}
+.maquetado *{
+  height: 40px;
+}
+.maquetado input{
+  padding-left:7px  ;
+}
+.maquetado button{
+  font-size: large;
+}
+.maquetado small{
+  color: red;
+}
+.confirm {
+  display: flex;
+  gap: 1rem;
+}
+.confirm a{
+  color: white;
+}
+

@@ -1,0 +1,124 @@
+import { Component, Output, EventEmitter, inject,signal } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { GetPost } from '../../../services/getPost/get-post';
+import { postCreation } from '../../../modelos/postCreation';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+@Component({
+  selector: 'app-create',
+  imports: [ReactiveFormsModule,MatSnackBarModule],
+  templateUrl: './create.html',
+  styleUrl: './create.css'
+})
+export class Create {
+  constructor(private snackbar: MatSnackBar){
+  }
+  service = inject(GetPost)
+  builder = inject(FormBuilder);
+  permissionOptions = [
+    { label: "none", value: 0 },
+    { label: "read_only", value: 1 },
+    { label: "read_and_write", value: 2 }
+  ];
+
+
+  isPublicOptions = [
+    { label: 'none', value: 0 },
+    { label: 'read_only', value: 1 }
+  ];
+  form = this.builder.group({
+      title: ['', [Validators.required]],
+      content: ['', [Validators.required]],
+      is_public: [1, [Validators.required]],
+      authenticated: [2, [Validators.required]],
+      team: [2, [Validators.required]],
+  })
+  is_public = signal(this.isPublicOptions)
+  auth = signal(this.permissionOptions)
+  teamOptions = signal(this.permissionOptions);
+  @Output() close = new EventEmitter<void>()
+
+ngOnInit() {
+  this.setValues()
+}
+
+
+setValues(){
+  //options manage
+  let controlpublic = this.form.controls.is_public;
+  let controlAuth = this.form.controls.authenticated;
+  let controlTeam = this.form.controls.team
+
+  //si public > authenticated
+  this.form.get("is_public")?.valueChanges.subscribe(is_public => {
+    if(is_public === null)return
+    let auth = controlAuth.value ?? 0
+    if(is_public > auth){
+      console.log("Changing auth from public")
+      controlAuth.setValue(is_public)
+    }
+    this.auth.set(this.permissionOptions.filter(p => p.value >= is_public))
+
+  })
+  //si authenticated > team
+  this.form.get("authenticated")?.valueChanges.subscribe(auth => {
+    if(auth === null)return
+    let team = controlTeam.value?? 0;
+    if(auth > team ){
+      console.log("Changing team from auth")
+      controlTeam.setValue(auth)
+    }
+    if(controlpublic.value && controlpublic.value > auth){
+      controlpublic.setValue(auth)
+    }
+    this.teamOptions.set(this.permissionOptions.filter(p => p.value >= auth))
+    this.is_public.set(this.isPublicOptions.filter(p => p.value <= auth))
+
+  })
+  //si team < auth
+  this.form.get("team")?.valueChanges.subscribe(team =>{
+    if(team === null)return
+    let auth = controlAuth.value ?? 0;
+    if(team < auth){
+      console.log("Changing auth from team")
+      controlAuth.setValue(team)
+    }
+    this.auth.set(this.permissionOptions.filter(p => p.value <= team))
+  })
+
+}
+
+  onClose(){
+    this.close.emit()
+  }
+
+  submit(){
+    if(this.form.valid){
+        const data = this.form.getRawValue() as postCreation;
+        this.service.sendPost(data).subscribe({
+        next: () => {
+          this.snackbar.open('Post created.', 'close', {
+          duration: 2000,
+          verticalPosition: "top"
+        });
+
+        setTimeout(() => {
+          this.reloadPage()
+        }, 2000);
+
+    },
+        error: () => {
+          this.snackbar.open('Post could not be created.', 'close', {
+          duration: 2000,
+          verticalPosition: "top"})
+        }
+
+      })
+    }
+  }
+
+  reloadPage(){
+    window.location.reload();
+
+  }
+
+}

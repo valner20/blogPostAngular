@@ -6,8 +6,103 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
+  <canvas id="canvas"></canvas>
   <app-root></app-root>
+
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let estrellas = [];
+  const numEstrellas = 300;
+  let dpr = window.devicePixelRatio || 1;
+
+  function generarEstrellas(width, height) {
+    estrellas = [];
+    for (let i = 0; i < numEstrellas; i++) {
+      estrellas.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.5 + 0.5,
+        alpha: Math.random(),
+        delta: Math.random() * 0.02
+      });
+    }
+  }
+
+  function getTotalHeight() {
+    return Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight,
+      document.body.clientHeight,
+      document.documentElement.clientHeight
+    );
+  }
+
+  function resize() {
+    const width = window.innerWidth;
+    const height = getTotalHeight();
+
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    generarEstrellas(width, height);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+
+//   function estaSobrePost(x, y) {
+//   const elementosPost = document.querySelectorAll('.post');
+//   for (let el of elementosPost) {
+//     const rect = el.getBoundingClientRect();
+//     if (
+//       x >= rect.left &&
+//       x <= rect.right &&
+//       y >= rect.top + window.scrollY &&
+//       y <= rect.bottom + window.scrollY
+//     ) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
+
+  function dibujar() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let estrella of estrellas) {
+      // const x = estrella.x / dpr;
+      // const y = estrella.y / dpr;
+      // if (estaSobrePost(x, y)) continue;
+
+      ctx.beginPath();
+      ctx.arc(estrella.x / dpr, estrella.y / dpr, estrella.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${estrella.alpha})`;
+      ctx.fill();
+
+      estrella.alpha += estrella.delta;
+      if (estrella.alpha <= 0 || estrella.alpha >= 1) {
+        estrella.delta = -estrella.delta;
+      }
+    }
+    requestAnimationFrame(dibujar);
+  }
+
+  dibujar();
+</script>
+
+
+
 </body>
 </html>

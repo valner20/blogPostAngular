@@ -1,0 +1,56 @@
+@if (post) {
+
+  <div class="modalFondo" (click)="onClose()"></div>
+  <div class="modal">
+    <button (click)="onClose()">✕</button>
+
+    <h1>{{ post.title }}</h1>
+
+    <div class="meta">
+      <p><strong>Team:</strong> {{ post.author_team }}</p>
+      <p><strong>Author:</strong> {{ post.author }}</p>
+      <p><strong>Date:</strong> {{ post.created_at | date: "medium" }}</p>
+    </div>
+
+    <p >{{ post.content }}</p>
+
+    <div>
+        <h4> {{post.like_count}} Likes</h4>
+    </div>
+   <div class="comments-container">
+  <h2>{{post.comment_count}} Comments</h2>
+  @for (i of comments; track $index) {
+    <div class="comment-card">
+      <h3>{{ i.user }}</h3>
+      <div class="info">
+        <p>{{ i.created_at |date:"medium"}}</p>
+      </div>
+      <p class="content">{{ i.content }}</p>
+    </div>
+  }
+  @if(comments.length > 0){
+    <div class="pagination" >
+      <button (click)="prevPage()" [disabled]="currentPage === 1">‹</button>
+      <span>{{ startIndex() + 1 }}–{{ endIndex() }} of {{ totalComments }}</span>
+      <button (click)="nextPage()" [disabled]="endIndex() >= totalComments">›</button>
+    </div>
+  }
+  @if (logged) {
+
+    <div class="addComent">
+      <h2>Add New Comment:</h2>
+      <div class="input">
+
+        <input [(ngModel)]="comment" type="text">
+      </div>
+      <div class="buttons">
+        <button (click)="send()" [disabled]="!comment.trim()">submit</button>
+        <button (click)="cancel()">Cancel</button>
+      </div>
+    </div>
+  }
+
+</div>
+  </div>
+
+}

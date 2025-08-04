@@ -1,0 +1,18 @@
+<div class="navbar">
+  @if (!logged) {
+    <div class="links">
+      <a [routerLink]="['/login']">login</a>
+      <div class="rayita"></div>
+      <a [routerLink]="['/registrar']">register</a>
+    </div>
+  } @else {
+    <div class="links">
+      <h3 class="username">{{ username }}</h3>
+      <button (click)="onLogout()" class="logout">logout</button>
+    </div>
+  }
+
+  <div class="image">
+    <img src="avanzatech.png" alt="no se cargo" />
+  </div>
+</div>

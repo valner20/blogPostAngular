@@ -1,0 +1,59 @@
+<div class="post" style="position: relative">
+  <div class="header">
+    <h1>{{ post.title }}</h1>
+    <div class="meta">
+      <span>Team {{ post.author_team }}</span>
+      <span>{{ post.author }}</span>
+      <span>{{ post.created_at | date: 'medium' }}</span>
+    </div>
+  </div>
+  <div class="content">
+    <p>
+      {{ post.content.length < 200 ? post.content : post.content.slice(0, 200) + '...' }}
+      <button *ngIf="post.content.length > 200" (click)="showDetail.emit(post)" class="showMore">
+        Show More
+      </button>
+    </p>
+  </div>
+  <div class="interacciones">
+    <button (click)="showLikes()" >
+    {{ post.like_count }} Likes
+    </button>
+    <button (click)="showDetail.emit(post)">{{post.comment_count}} Comments</button>
+    <div class="botones" *ngIf="logged">
+
+      <button (click)="giveLike()">
+        <i class="fa-heart" [class.fas]="liked.bool" [class.far]="!liked.bool"></i>
+      </button>
+      <button>comment</button>
+       @if (canWrite(post.permissions)) {
+         <button>edit</button>
+         <button (click)="delete()">delete</button>
+        }
+    </div>
+  </div>
+  <div *ngIf="overlay" class="likes" id="likes-overlay" >
+    <ul>
+      <li *ngFor="let user of userLikes">{{ user.username }}</li>
+    </ul>
+
+      <div class="pagination" *ngIf="userLikes && userLikes.length > 0">
+        <button (click)="prevPage()" [disabled]="currentPage === 1">‹</button>
+        <span>{{ startIndex() + 1 }}–{{ endIndex() }} of {{ totalLikes }}</span>
+        <button (click)="nextPage()" [disabled]="endIndex() >= totalLikes">›</button>
+      </div>
+
+  </div>
+</div>
+
+
+<div class="alertBack" *ngIf="show" (click)="close()"></div>
+
+<div class="alert" *ngIf="show">
+  <div class="alertContent">
+    <h2>Alert!</h2>
+    <p>Are you sure you want to delete: {{post.title}}</p>
+    <button (click)="confirm(post.id)">Confirmar</button>
+    <button (click)="close()">Cerrar</button>
+  </div>
+</div>

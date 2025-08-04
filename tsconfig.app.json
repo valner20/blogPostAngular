@@ -10,7 +10,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/modelos/likes.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

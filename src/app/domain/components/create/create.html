@@ -1,0 +1,65 @@
+<div class="modalFondo" (click)="onClose()"></div>
+
+<div class="modal" (click)="$event.stopPropagation()">
+  <button (click)="onClose()">✕</button>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Title
+      <input type="text" formControlName="title">
+      @if (form.controls.title.touched && form.controls.title.invalid) {
+        <small class ="error">Required Field </small>
+      }
+    </label>
+
+    <label>
+      Content
+      <textarea formControlName="content"></textarea>
+       @if (form.controls.content.touched && form.controls.content.invalid) {
+        <small class ="error">Required Field </small>
+      }
+    </label>
+
+    <label>
+      Public
+      <select formControlName="is_public">
+         @for (opt of is_public(); track opt.value) {
+    <option [value]="opt.value">{{ opt.label }}</option>
+     }
+      @if (form.controls.is_public.touched && form.controls.is_public.invalid) {
+        <small class ="error">Required Field </small>
+      }
+    </select>
+    </label>
+
+    <label>
+      Authenticated
+      <select formControlName="authenticated">
+       @for (opt of auth(); track opt.value) {
+    <option [value]="opt.value">{{ opt.label }}</option>
+      }
+       @if (form.controls.authenticated.touched && form.controls.authenticated.invalid) {
+        <small class ="error">Required Field </small>
+      }
+    </select>
+    </label>
+
+    <label>
+      Team:
+      <select formControlName="team">
+       @for (opt of teamOptions(); track opt.value) {
+       <option [value]="opt.value">{{ opt.label }}</option>
+       }
+        @if (form.controls.team.touched && form.controls.team.invalid) {
+        <small class ="error">Required Field </small>
+      }
+        </select>
+    </label>
+    <div class="buttons">
+
+
+      <button type="submit" [disabled]="form.invalid" >Publish</button>
+      <button (click)="onClose()">Cancel</button>
+    </div>
+  </form>
+</div>

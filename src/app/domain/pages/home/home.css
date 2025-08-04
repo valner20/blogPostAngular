@@ -1,0 +1,91 @@
+
+
+.scroll {
+  top: 15%;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+
+.posts {
+  position: relative;
+  width: 80%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  z-index: 1;
+}
+
+.add {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  cursor: pointer;
+  z-index: 10;
+  user-select: none;
+}
+
+.add i{
+  color: white;
+}
+
+.pagination{
+  position: absolute;
+  color: #ccc;
+  right: 8%;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 1rem;
+  color: #ffffffcc;
+  font-size: 1.3rem;
+  margin: 5.3rem auto;
+  width: fit-content;
+}
+
+.pagination button {
+  background-color: transparent;
+  border: 1px solid #ffffff33;
+  color: white;
+  font-size: 1.25rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pagination button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pagination span {
+  color: #aaa;
+  font-weight: 300;
+}
+
+
+
+
+
+
+@media (max-width: 700px) {
+
+  .posts {
+    width: 100%;
+    padding: 2rem 1rem;
+  }
+}

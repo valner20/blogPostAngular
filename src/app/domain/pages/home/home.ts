@@ -1,0 +1,157 @@
+import { Component, inject, signal } from '@angular/core';
+import { postModel } from '../../../modelos/postModel';
+import { GetPost } from '../../../services/getPost/get-post';
+import { CommonModule } from '@angular/common';
+import { GetLikes } from '../../../services/likes/get-likes';
+import {  ActivatedRoute } from '@angular/router';
+import { PostDetail } from '../../components/post-detail/post-detail';
+import { Post } from '../../components/post/post';
+import { Navbar } from '../../components/navbar/navbar';
+import { switchMap, of, tap } from 'rxjs';
+import { Location } from '@angular/common';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { Create } from '../../components/create/create';
+
+@Component({
+  selector: 'app-home',
+  imports: [Create, CommonModule, PostDetail, Post, Navbar, MatSnackBarModule],
+  templateUrl: './home.html',
+  styleUrl: './home.css'
+})
+export class Home {
+
+  snackbar = inject(MatSnackBar)
+  route = inject(ActivatedRoute)
+  finished = false
+  mapa: {[key:number] : {id:number, bool: boolean}} = {}
+  service = inject(GetPost);
+  posts!: postModel[];
+  modal: postModel | null = null;
+  logged = signal<boolean>(!!localStorage.getItem("access"));
+  username = localStorage.getItem("username");
+  location = inject(Location)
+  private likeService = inject(GetLikes);
+  currentPage: number = 1;
+  totalPost: number = 0;
+  totalPages: number = 0;
+  pageSize = 10
+  creating: postModel| boolean = false
+
+  loadPost(page: number) {
+    this.service.load(page).subscribe({
+      next: (data) => {
+      this.currentPage = data.current
+      this.totalPost  = data.total_count
+      this.totalPages = data.total
+      this.posts = data.result;
+      if(!this.logged()){
+        this.finished= true
+      }
+      else{
+        this.postsLiked();
+      }
+    },
+    error: () => {
+       this.snackbar.open('No se pudieron cargar los post.', 'Cerrar', {
+          duration: 3000,
+          verticalPosition: "top"
+        });
+    }
+    });
+  }
+  postsLiked() {
+    let arrayIds: number[] = []
+    for (let i = 0; i < this.posts.length; i++) {
+        arrayIds[i] = this.posts[i].id
+  }
+  this.likeService.likesPerUser(arrayIds).subscribe({
+    next: (data) => {
+
+      for (let index = 0; index < data.result.length; index++) {
+        this.mapa[data.result[index].post] = {id: data.result[index].id, bool:true}
+      }
+      this.finished = true
+
+    },
+    error: () => {
+        this.snackbar.open("no se pudieron cargar los likes", "cerrar", {duration: 3000, verticalPosition: "top"})
+      }
+    })
+}
+
+  ngOnInit(){
+    this.route.paramMap.pipe(
+      switchMap((parametro) => {
+        let id = parametro.get("id")
+        if(id){
+          return this.service.loadPost(id)
+        }
+        else{
+          this.loadPost(1)
+          return of()
+        }
+      }
+
+    )
+    )
+    .subscribe(data => {
+    if (data) this.showPostDetail(data);    })
+  }
+
+
+showPostDetail(post: postModel | null) {
+  this.modal = post;
+  if(this.modal)
+    this.location.go(`/home/${this.modal.id}`);
+}
+
+closeModal() {
+  this.modal = null;
+  if(!this.posts ||this.posts.length >0){
+    this.loadPost(1)
+  }
+  this.location.go("/home");
+
+}
+
+logout() {
+  localStorage.clear();
+  this.logged.set(false);
+}
+
+nextPage() {
+  if (this.currentPage < this.totalPages) {
+    this.loadPost(this.currentPage + 1);
+  }
+}
+
+prevPage() {
+  if (this.currentPage > 1) {
+    this.loadPost(this.currentPage - 1);
+  }
+}
+
+startIndex(): number {
+  return (this.currentPage - 1) * this.pageSize;
+}
+
+endIndex(): number {
+  return Math.min(this.startIndex() + this.pageSize, this.totalPost);
+}
+
+sendPost(post?:postModel){
+  if(post){
+    this.creating = post;
+  }
+  else{
+    this.creating = true;
+
+  }
+}
+
+closeSendPost(){
+  this.creating=false
+}
+
+
+}
