@@ -25,10 +25,10 @@
       <button (click)="giveLike()">
         <i class="fa-heart" [class.fas]="liked.bool" [class.far]="!liked.bool"></i>
       </button>
-      <button>comment</button>
+      <button><i class="fa-regular fa-comment"></i></button>
        @if (canWrite(post.permissions)) {
-         <button>edit</button>
-         <button (click)="delete()">delete</button>
+         <button (click)="editing=true"><i class="fa-solid fa-pen-to-square"></i></button>
+         <button (click)="delete()"><i class="fa-solid fa-trash"></i></button>
         }
     </div>
   </div>
@@ -57,3 +57,9 @@
     <button (click)="close()">Cerrar</button>
   </div>
 </div>
+
+@if (editing) {
+  <app-create
+  [post]="post"
+  (close)="closeUpdate()"></app-create>
+}

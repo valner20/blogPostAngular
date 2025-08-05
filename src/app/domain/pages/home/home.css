@@ -29,6 +29,7 @@
 }
 
 .add i{
+  user-select: none;
   color: white;
 }
 

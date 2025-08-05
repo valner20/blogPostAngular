@@ -231,7 +231,7 @@ describe('Permission Logic Tests', () => {
       expect(component.form.invalid).toBeTruthy();
     });
 
-    it('should be valid when all required fields are filled', () => {
+    it('should be valid when all required fields are filled, the choices have default value', () => {
       component.form.patchValue({
         title: 'Test Title',
         content: 'Test Content'

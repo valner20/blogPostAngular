@@ -1,65 +1,107 @@
 <div class="modalFondo" (click)="onClose()"></div>
-
 <div class="modal" (click)="$event.stopPropagation()">
-  <button (click)="onClose()">✕</button>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <label>
-      Title
-      <input type="text" formControlName="title">
-      @if (form.controls.title.touched && form.controls.title.invalid) {
-        <small class ="error">Required Field </small>
-      }
-    </label>
+  <div class="modal-header">
+    <h2>Create New Post</h2>
+    <button class="close-button" (click)="onClose()">✕</button>
+  </div>
 
-    <label>
-      Content
-      <textarea formControlName="content"></textarea>
-       @if (form.controls.content.touched && form.controls.content.invalid) {
-        <small class ="error">Required Field </small>
-      }
-    </label>
+  <div class="modal-content">
+    <form [formGroup]="form" (ngSubmit)="submit()">
 
-    <label>
-      Public
-      <select formControlName="is_public">
-         @for (opt of is_public(); track opt.value) {
-    <option [value]="opt.value">{{ opt.label }}</option>
-     }
-      @if (form.controls.is_public.touched && form.controls.is_public.invalid) {
-        <small class ="error">Required Field </small>
-      }
-    </select>
-    </label>
+      <div class="form-group">
+        <label for="title">Title</label>
+        <div class="input-wrapper">
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="Enter post title..."
+          />
+          @if (form.get('title')?.touched && form.get('title')?.invalid) {
+            <small class="error">Title is required</small>
+          }
+        </div>
+      </div>
 
-    <label>
-      Authenticated
-      <select formControlName="authenticated">
-       @for (opt of auth(); track opt.value) {
-    <option [value]="opt.value">{{ opt.label }}</option>
-      }
-       @if (form.controls.authenticated.touched && form.controls.authenticated.invalid) {
-        <small class ="error">Required Field </small>
-      }
-    </select>
-    </label>
+     <div class="form-group">
+        <label for="content">Content</label>
+        <div class="input-wrapper" id="editor-container">
+          <quill-editor
+            formControlName="content"
+            [modules]="quillConfig"
+            [styles]="{
+              minHeight: '200px',
+              maxHeight: '400px'
+            }"
+            class="rich-editor"
+            placeholder="Write your post content here...">
+          </quill-editor>
+          @if (form.get('content')?.touched && form.get('content')?.invalid) {
+            <small class="error">Content is required</small>
+          }
+        </div>
+      </div>
 
-    <label>
-      Team:
-      <select formControlName="team">
-       @for (opt of teamOptions(); track opt.value) {
-       <option [value]="opt.value">{{ opt.label }}</option>
-       }
-        @if (form.controls.team.touched && form.controls.team.invalid) {
-        <small class ="error">Required Field </small>
-      }
-        </select>
-    </label>
-    <div class="buttons">
+      <div class="permissions-grid">
+        <div class="permission-card">
+          <div class="form-group">
+            <label for="is_public">Public</label>
+            <div class="input-wrapper">
+              <select id="is_public" formControlName="is_public">
+                @for (opt of is_public(); track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+              @if (form.get('is_public')?.touched && form.get('is_public')?.invalid) {
+                <small class="error">Required field</small>
+              }
+            </div>
+          </div>
+        </div>
 
+        <div class="permission-card">
+          <div class="form-group">
+            <label for="authenticated">Authenticated</label>
+            <div class="input-wrapper">
+              <select id="authenticated" formControlName="authenticated">
+                @for (opt of auth(); track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+              @if (form.get('authenticated')?.touched && form.get('authenticated')?.invalid) {
+                <small class="error">Required field</small>
+              }
+            </div>
+          </div>
+        </div>
 
-      <button type="submit" [disabled]="form.invalid" >Publish</button>
-      <button (click)="onClose()">Cancel</button>
-    </div>
-  </form>
+        <div class="permission-card">
+          <div class="form-group">
+            <label for="team">Team</label>
+            <div class="input-wrapper">
+              <select id="team" formControlName="team">
+                @for (opt of teamOptions(); track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+              @if (form.get('team')?.touched && form.get('team')?.invalid) {
+                <small class="error">Required field</small>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button type="button" class="btn-secondary" (click)="onClose()">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid">
+          Publish Post
+        </button>
+      </div>
+
+    </form>
+  </div>
 </div>

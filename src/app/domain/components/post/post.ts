@@ -1,20 +1,20 @@
 import { postModel } from './../../../modelos/postModel';
-import { Component, Input, Output, EventEmitter, HostListener, ElementRef, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { likes } from '../../../modelos/likes';
 import { GetLikes } from '../../../services/likes/get-likes';
 import { GetPost } from '../../../services/getPost/get-post';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { Create } from '../create/create';
 
 @Component({
   selector: 'app-post',
-  imports: [CommonModule, MatSnackBarModule],
+  imports: [CommonModule, MatSnackBarModule, Create],
   templateUrl: './post.html',
   styleUrl: './post.css',
 })
 export class Post {
   snackbar = inject(MatSnackBar)
-  elementRef = inject(ElementRef)
   @Input() post!: postModel;
   @Input() liked!: {id: number, bool:boolean}
   @Input() logged: boolean = false;
@@ -27,8 +27,8 @@ export class Post {
   totalPages: number = 0;
   overlay: boolean = false;
   pageSize = 15;
-  confirmation = false
   show = false
+  editing = false
   team = localStorage.getItem("team")
   username = localStorage.getItem("username")
   staff = localStorage.getItem("staff")
@@ -143,7 +143,9 @@ export class Post {
 
   }
 
-
+  closeUpdate(){
+    this.editing = false
+  }
 
 
 }

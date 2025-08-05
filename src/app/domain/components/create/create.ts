@@ -1,17 +1,21 @@
-import { Component, Output, EventEmitter, inject,signal } from '@angular/core';
+import { Component, Output, EventEmitter, inject,signal, Input } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GetPost } from '../../../services/getPost/get-post';
 import { postCreation } from '../../../modelos/postCreation';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { postModel } from '../../../modelos/postModel';
+import { QuillModule } from 'ngx-quill';
+
 @Component({
   selector: 'app-create',
-  imports: [ReactiveFormsModule,MatSnackBarModule],
+  imports: [ReactiveFormsModule,MatSnackBarModule, QuillModule],
   templateUrl: './create.html',
   styleUrl: './create.css'
 })
 export class Create {
   constructor(private snackbar: MatSnackBar){
   }
+  @Input() post?: postModel
   service = inject(GetPost)
   builder = inject(FormBuilder);
   permissionOptions = [
@@ -20,35 +24,35 @@ export class Create {
     { label: "read_and_write", value: 2 }
   ];
 
-
   isPublicOptions = [
     { label: 'none', value: 0 },
     { label: 'read_only', value: 1 }
   ];
-  form = this.builder.group({
-      title: ['', [Validators.required]],
-      content: ['', [Validators.required]],
-      is_public: [1, [Validators.required]],
-      authenticated: [2, [Validators.required]],
-      team: [2, [Validators.required]],
-  })
   is_public = signal(this.isPublicOptions)
   auth = signal(this.permissionOptions)
   teamOptions = signal(this.permissionOptions);
+
+  form!: FormGroup
   @Output() close = new EventEmitter<void>()
 
 ngOnInit() {
-  this.setValues()
+ this.form = this.builder.group({
+    title: [this.post?.title ?? "", [Validators.required]],
+    content: [this.post?.content ?? "", [Validators.required]],
+    is_public: [this.post?.permissions?.is_public ?? 1, [Validators.required]],
+    authenticated: [this.post?.permissions?.authenticated ?? 2, [Validators.required]],
+    team: [this.post?.permissions?.team ?? 2, [Validators.required]],
+  });
+
+  this.setValues();
 }
 
 
 setValues(){
-  //options manage
-  let controlpublic = this.form.controls.is_public;
-  let controlAuth = this.form.controls.authenticated;
-  let controlTeam = this.form.controls.team
+  let controlpublic = this.form.controls['is_public'];
+  let controlAuth = this.form.controls['authenticated'];
+  let controlTeam = this.form.controls['team'];
 
-  //si public > authenticated
   this.form.get("is_public")?.valueChanges.subscribe(is_public => {
     if(is_public === null)return
     let auth = controlAuth.value ?? 0
@@ -59,7 +63,9 @@ setValues(){
     this.auth.set(this.permissionOptions.filter(p => p.value >= is_public))
 
   })
-  //si authenticated > team
+
+
+
   this.form.get("authenticated")?.valueChanges.subscribe(auth => {
     if(auth === null)return
     let team = controlTeam.value?? 0;
@@ -74,7 +80,8 @@ setValues(){
     this.is_public.set(this.isPublicOptions.filter(p => p.value <= auth))
 
   })
-  //si team < auth
+
+   //si el team cambia primero cambia el auth y cambio public como cadena
   this.form.get("team")?.valueChanges.subscribe(team =>{
     if(team === null)return
     let auth = controlAuth.value ?? 0;
@@ -120,5 +127,46 @@ setValues(){
     window.location.reload();
 
   }
+
+quillConfig = {
+    toolbar: {
+      container: [
+        ['bold', 'italic', 'underline', 'strike'],
+
+        ['blockquote', 'code-block'],
+
+
+        [{ 'header': [1, 2, 3, false] }],
+
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+
+        [{ 'script': 'sub'}, { 'script': 'super' }],
+        [{ 'direction': 'rtl' }],
+
+        [{ 'align': [] }],
+
+        [{ 'color': [] }, { 'background': [] }],
+
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        [{ 'font': [] }],
+
+        ['link'],
+        ['clean']
+      ],
+
+    },
+    theme: 'snow',
+    placeholder: 'Write your post content here...',
+    bounds: '#editor-container',
+    modules: {
+      clipboard: {
+        matchVisual: false
+      }
+    }
+  };
+
+
 
 }
