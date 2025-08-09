@@ -1,7 +1,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { LoginService } from './login';
+import { LoginService } from './login-logout';
 import { loginInterface } from '../../modelos/login';
 import { auth } from '../../modelos/auth';
 
@@ -60,4 +60,12 @@ describe('Login', () => {
     req.flush({ detail: "correo o contraseña incorrectos" }, { status: 403, statusText: "Forbidden" })
 
   })
+
+  it("should not get token when the request is sended", () => {
+    service.login(data)
+    const req = mock.expectOne("http://127.0.0.1:8000/api/token/")
+    expect (req.request.method).toEqual("POST")
+    expect(req.request.body).toBeFalsy()
+  } )
+
 });

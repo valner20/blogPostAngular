@@ -8,11 +8,32 @@
   } @else {
     <div class="links">
       <h3 class="username">{{ username }}</h3>
-      <button (click)="onLogout()" class="logout">logout</button>
+      <button (click)="show=true" class="logout">logout</button>
     </div>
   }
 
   <div class="image">
     <img src="avanzatech.png" alt="no se cargo" />
   </div>
+
 </div>
+
+@if (show && !logouted) {
+
+  <div class="alertBack" (click)="show=false"></div>
+
+  <div class="alert" >
+    <div class="alertContent">
+      <h2>Alert!</h2>
+      <p>Are you sure you want to logout</p>
+      <button (click)="onLogout()" [disabled]="disable">
+        @if (!disable) {
+          Confirmar
+        } @else {
+          <span class="dots"></span>
+        }
+      </button>
+      <button (click)="show=false">Cerrar</button>
+    </div>
+  </div>
+}

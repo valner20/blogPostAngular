@@ -57,8 +57,14 @@ export class Register {
             this.form.get("email")?.setErrors({emailError: error.email});
 
           }
-          if(error.username){
+           if(error.username){
             this.form.get("username")?.setErrors({usernameError: error.username});
+          }
+          if (!error.email && !error.username){
+             this.snackbar.open('could not be registered, server error', 'Cerrar', {
+              duration: 3000,
+              panelClass: ['custom-snackbar']
+    });
           }
         }
       });
@@ -90,8 +96,7 @@ export class Register {
   mensaje() {
     this.snackbar.open('Registrado con exito', 'Cerrar', {
       duration: 3000,
-      panelClass: ["custom-style"]
-
+      panelClass: ['custom-snackbar']
     });
   }
 }

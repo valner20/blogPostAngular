@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators} from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
-import { LoginService } from '../../../services/login/login';
+import { LoginService } from '../../../services/login-logout/login-logout';
 import { loginInterface } from '../../../modelos/login';
 import { Router } from '@angular/router';
 @Component({

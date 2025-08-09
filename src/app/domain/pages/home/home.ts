@@ -11,7 +11,7 @@ import { switchMap, of, tap } from 'rxjs';
 import { Location } from '@angular/common';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { Create } from '../../components/create/create';
-
+import { LoginService } from '../../../services/login-logout/login-logout';
 @Component({
   selector: 'app-home',
   imports: [Create, CommonModule, PostDetail, Post, Navbar, MatSnackBarModule],
@@ -36,6 +36,9 @@ export class Home {
   totalPages: number = 0;
   pageSize = 10
   creating: postModel| boolean = false
+  logoutService = inject(LoginService)
+  show = false
+  logouted = false
 
   loadPost(page: number) {
     this.service.load(page).subscribe({
@@ -54,7 +57,8 @@ export class Home {
     error: () => {
        this.snackbar.open('No se pudieron cargar los post.', 'Cerrar', {
           duration: 3000,
-          verticalPosition: "top"
+          verticalPosition: "top",
+            panelClass: ['custom-snackbar']
         });
     }
     });
@@ -74,7 +78,7 @@ export class Home {
 
     },
     error: () => {
-        this.snackbar.open("no se pudieron cargar los likes", "cerrar", {duration: 3000, verticalPosition: "top"})
+        this.snackbar.open("no se pudieron cargar los likes", "cerrar", {duration: 3000, verticalPosition: "top",panelClass: ['custom-snackbar']})
       }
     })
 }
@@ -107,16 +111,38 @@ showPostDetail(post: postModel | null) {
 
 closeModal() {
   this.modal = null;
-  if(!this.posts ||this.posts.length >0){
+  if(!this.posts ||this.posts.length <=0){
     this.loadPost(1)
   }
   this.location.go("/home");
 
 }
 
+
 logout() {
-  localStorage.clear();
-  this.logged.set(false);
+  this.logoutService.logout()?.subscribe({
+    next: ()=>{
+       this.snackbar.open('logout succesfully.', 'close', {
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
+        });
+        this.logouted = true
+
+      localStorage.clear();
+      this.logged.set(false);
+
+
+    },
+    error: () => {
+      this.snackbar.open('could not logout, server error.', 'close', {
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
+        });
+        this.logouted
+    }
+  })
 }
 
 nextPage() {
@@ -152,6 +178,7 @@ sendPost(post?:postModel){
 closeSendPost(){
   this.creating=false
 }
+
 
 
 }

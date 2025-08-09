@@ -12,8 +12,11 @@ export class Navbar {
   @Input() username!: string | null;
   @Input() logged!: boolean;
   @Output() logout = new EventEmitter<void>();
-
+  @Input() logouted = false
+  show = false
+  disable = false
   onLogout() {
+    this.disable = true
     this.logout.emit();
   }
 }

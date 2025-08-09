@@ -13,7 +13,7 @@ export const interceptorInterceptor: HttpInterceptorFn = (req, next) => {
   const now = Math.floor(Date.now() / 1000);
 
     if (req.url.includes('/token/refresh/')) {
-    return next(req); 
+    return next(req);
   }
 
   if (!access) {
@@ -31,7 +31,7 @@ export const interceptorInterceptor: HttpInterceptorFn = (req, next) => {
 
   if (refresh) {
     const decodedRefresh: any = jwtDecode(refresh);
-    if (decodedRefresh.exp > now) {
+    if (decodedRefresh.exp > now) { 
       return http.post<{ access: string }>("http://127.0.0.1:8000/api/token/refresh/", { refresh }).pipe(
         switchMap(response => {
           localStorage.setItem("access", response.access);

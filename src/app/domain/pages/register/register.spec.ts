@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { RegisterService } from '../../../services/register/register';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -157,7 +157,7 @@ describe('Register', () => {
 
   })
 
-  it("should handle backend errors for email and username existent", () => {
+  it("should handle backend errors for email and username existent", fakeAsync(() => {
     const serviceError= {
       error: {
         username: ["username Exist"],
@@ -175,6 +175,10 @@ describe('Register', () => {
       confirm: "1234"
     })
     component.create()
+
+    flush()
+    fixture.detectChanges()
+
     expect(component.form.get("email")?.errors).toEqual({
       emailError: ["email Exist"]
 
@@ -183,7 +187,7 @@ describe('Register', () => {
       usernameError: ["username Exist"]
     })
 
-  })
+  }))
 
   it("should delete errors after start typing" ,() => {
     const control = component.form.get("username");

@@ -2,6 +2,7 @@
   [logged]="logged()"
   [username]="username"
   (logout)="logout()"
+  [logouted]="logouted"
 ></app-navbar>
 <div class="pagination">
       <button (click)="prevPage()" [disabled]="currentPage === 1">‹</button>
@@ -32,3 +33,5 @@
 @if(creating){
   <app-create (close) ="closeSendPost()"></app-create>
 }
+
+

@@ -21,7 +21,8 @@ export class GetPost {
     return this.service.get<postModel>(this.url+id+"/")
   }
 
-  sendPost(post: postCreation){
+  sendPost(post: postCreation, id?:number){
+    if(id) return this.service.put(this.url+id+"/", post)
     return this.service.post(this.url, post)
   }
 

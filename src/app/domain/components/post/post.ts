@@ -1,11 +1,14 @@
 import { postModel } from './../../../modelos/postModel';
-import { Component, Input, Output, EventEmitter, HostListener, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, inject,ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { likes } from '../../../modelos/likes';
 import { GetLikes } from '../../../services/likes/get-likes';
 import { GetPost } from '../../../services/getPost/get-post';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { Create } from '../create/create';
+import truncate from 'truncate-html';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
 
 @Component({
   selector: 'app-post',
@@ -33,6 +36,9 @@ export class Post {
   username = localStorage.getItem("username")
   staff = localStorage.getItem("staff")
 
+
+
+
   giveLike() {
     if (this.liked.bool) {
       this.likeService.delete(this.liked.id).subscribe(() => {
@@ -46,6 +52,13 @@ export class Post {
             if (res.result.length > 0) {
               this.liked = { id: res.result[0].id, bool: true};
             }
+          },
+          error: ()=> {
+               this.snackbar.open('like could not be gived, server error.', 'close', {
+               duration: 3000,
+               verticalPosition: "top",
+               panelClass: ['custom-snackbar']
+        });
           }
         });
         this.post.like_count++;
@@ -70,14 +83,23 @@ export class Post {
   }
 
   loadLikes(page: number = 1) {
-    this.likeService.loadLikesPag(this.post.id, page).subscribe((res) => {
+    this.likeService.loadLikesPag(this.post.id, page).subscribe({
+    next: (res) => {
       this.userLikes = res.result;
       this.currentPage = res.current;
       this.totalLikes = res.total_count;
       this.totalPages = res.total;
       this.overlay = true
 
-    });
+    },
+    error: () => {
+      this.snackbar.open('likes could not be loaded.', 'close', {
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
+        });
+    }
+  });
   }
 
   nextPage() {
@@ -123,12 +145,17 @@ export class Post {
       error: () => {
         this.snackbar.open('Post could not be deleted.', 'close', {
           duration: 3000,
-          verticalPosition: "top"
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
         });
       }
     })
   }
+
+
   canWrite(permission: {is_public: number, authenticated: number, team:number} ){
+    if(!this.logged) return false
+
     if(permission.authenticated==2){
       return true
     }
@@ -147,5 +174,37 @@ export class Post {
     this.editing = false
   }
 
+
+
+  sanitizer = inject(DomSanitizer)
+
+getExcerptHtml(html: string, limit: number = 200): SafeHtml {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  const fullText = div.textContent || '';
+
+  if (fullText.length <= limit) {
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+  const truncatedText = fullText.slice(0, limit) + '...';
+
+  const wrapper = document.createElement('div');
+  wrapper.textContent = truncatedText;
+
+  const button = document.createElement('button');
+  button.innerText = 'Show More';
+  button.className = 'showMore';
+  wrapper.appendChild(button);
+
+  return this.sanitizer.bypassSecurityTrustHtml(wrapper.innerHTML);
+}
+
+  handleExcerptClick(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+
+  if (target.classList.contains('showMore')) {
+    this.showDetail.emit(this.post);
+  }
+}
 
 }

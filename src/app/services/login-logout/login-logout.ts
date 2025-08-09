@@ -1,4 +1,4 @@
-import { loginInterface } from './../../modelos/login';
+import { loginInterface } from '../../modelos/login';
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
@@ -20,4 +20,10 @@ export class LoginService {
     )
   }
 
+  logout(){
+    let refresh = localStorage.getItem("refresh")
+    if(refresh)
+      return this.http.post("http://127.0.0.1:8000/logout/",{refresh} )
+    return
+  }
 }

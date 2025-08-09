@@ -58,7 +58,7 @@ describe('Create', () => {
     component.submit();
     tick(2000);
 
-    expect(service.sendPost).toHaveBeenCalledWith(data);
+    expect(service.sendPost).toHaveBeenCalledWith(data, undefined);
 
     expect(component.reloadPage).toHaveBeenCalled();
   }));
@@ -106,6 +106,40 @@ describe('Create', () => {
     component.submit();
     expect(service.sendPost).not.toHaveBeenCalled();
   });
+
+
+it('should call service.create with post id in edit mode', fakeAsync(() => {
+  component.editing = true;
+  component.post = { id: 123 } as any;
+
+  const createSpy = spyOn(service, 'sendPost').and.returnValue(of({}));
+
+  component.submit();
+  tick();
+
+  expect(createSpy).toHaveBeenCalledWith(jasmine.any(Object), 123);
+}));
+
+
+it('should initialize form with @Input() post data', () => {
+  const mockPost = {
+     title: "fail",
+    content: "error case",
+    is_public: 1,
+    authenticated: 2,
+    team: 2
+
+  } as any;
+
+  component.post = mockPost;
+  component.ngOnInit();
+
+  expect(component.form.value.content).toBe('Hello World');
+  expect(component.form.value.is_public).toBe(1);
+  expect(component.form.value.authenticated).toBe(2);
+  expect(component.form.value.team).toBe(0);
+});
+
 describe('Permission Logic Tests', () => {
 
     it('should update authenticated when is_public is greater', () => {
@@ -196,25 +230,26 @@ describe('Permission Logic Tests', () => {
       expect(component.form.get('authenticated')?.value).toBe(initialAuthValue);
     });
 
-    it('should handle edge case when team equals auth', () => {
+    it('should handle edge case when team equals auth', fakeAsync(() => {
+      component.ngOnInit()
       component.form.patchValue({
-        authenticated: 1,
+        is_public: 1,
         team: 1
       });
-
+      tick()
       expect(component.form.get('authenticated')?.value).toBe(1);
-    });
+    }));
 
-    it('should handle complex permission cascade', () => {
+    it('should handle complex permission cascade', fakeAsync(() => {
+      component.ngOnInit()
       component.form.patchValue({
-        is_public: 2,
-        authenticated: 0,
-        team: 0
+        is_public: 1,
       });
-
-      expect(component.form.get('authenticated')?.value).toBe(2);
-      expect(component.form.get('team')?.value).toBe(2);
-    });
+      component.form.get("team")?.setValue(1)
+      tick()
+      expect(component.form.get('authenticated')?.value).toBe(1);
+      expect(component.form.get('team')?.value).toBe(1);
+    }));
   });
 
   describe('Form Validation Tests', () => {

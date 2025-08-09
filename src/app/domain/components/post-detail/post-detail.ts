@@ -4,9 +4,11 @@ import { Component, Input, Output,EventEmitter, inject } from '@angular/core';
 import { GetComments } from '../../../services/comments/get-comments';
 import { commentsModel } from '../../../modelos/comments';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-post-detail',
-  imports: [DatePipe, FormsModule],
+  imports: [DatePipe, FormsModule, MatSnackBarModule],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css'
 })
@@ -23,6 +25,8 @@ export class PostDetail {
   pageSize = 5;
   comment: string = ""
   empty: boolean = false
+  snackbar = inject(MatSnackBar)
+
   ngOnInit(){
     this.loadComments(1)
   }
@@ -39,6 +43,13 @@ export class PostDetail {
         this.totalComments = data.total_count
         this.totalPages = data.total
         this.comments = data.result
+      },
+      error: () => {
+        this.snackbar.open('could not load comments.', 'close', {
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
+        });
       }
     })
   }
@@ -70,15 +81,35 @@ export class PostDetail {
       this.service.send(this.post.id, this.comment).subscribe({
         next: ()=>{
           this.comment = ""
+          this.snackbar.open('comment created.', 'close', {
+            duration: 3000,
+            verticalPosition: "top",
+            panelClass: ['custom-snackbar']
+          });
           this.loadComments(1)
           this.post.comment_count++;
+        },
+        error: () => {
+          this.snackbar.open('comment could not be created.', 'close', {
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
+        });
         }
-      })
+       })
     }
+
   }
   cancel(){
     this.comment=""
   }
+
+  sanitizer = inject(DomSanitizer)
+  htmlloron(html: string): SafeHtml {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return this.sanitizer.bypassSecurityTrustHtml(div.innerHTML);
+}
 
 
 }

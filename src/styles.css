@@ -25,4 +25,141 @@ input {
   border-radius: 3px;
 }
 
+.ql-size-small {
+  font-size: 0.75em;
+}
 
+.ql-size-large {
+  font-size: 1.5em;
+}
+
+.ql-size-huge {
+  font-size: 2.5em;
+}
+
+
+.ql-indent-1 {
+  padding-left: 3em;
+}
+
+.ql-indent-2 {
+  padding-left: 6em;
+}
+
+.ql-indent-3 {
+  padding-left: 9em;
+}
+
+.ql-indent-4 {
+  padding-left: 12em;
+}
+
+.ql-indent-5 {
+  padding-left: 15em;
+}
+
+.ql-indent-6 {
+  padding-left: 18em;
+}
+
+.ql-indent-7 {
+  padding-left: 21em;
+}
+
+.ql-indent-8 {
+  padding-left: 24em;
+}
+
+.ql-align-left {
+  text-align: left;
+}
+
+.ql-align-center {
+  text-align: center;
+}
+
+.ql-align-right {
+  text-align: right;
+}
+
+.ql-align-justify {
+  text-align: justify;
+}
+
+
+
+.ql-editor strong {
+  font-weight: bold;
+}
+
+.ql-editor em {
+  font-style: italic;
+}
+
+.ql-editor u {
+  text-decoration: underline;
+}
+
+.ql-editor s {
+  text-decoration: line-through;
+}
+
+
+
+
+
+.ql-script-sub {
+  vertical-align: sub;
+  font-size: 0.8em;
+}
+.ql-script-super {
+  vertical-align: super;
+  font-size: 0.8em;
+}
+
+
+
+.ql-direction-rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+
+.ql-editor span[style*="background-color"] {
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+}
+
+.ql-editor u {
+  text-decoration: underline;
+}
+
+
+body .ql-editor ol li {
+
+  list-style-type:decimal ;
+}
+
+body .ql-editor ul li{
+  list-style-type: disc;
+}
+
+.mat-snack-bar-container .ql-list {
+  counter-reset: none !important;
+}
+
+
+.custom-snackbar {
+  position: absolute;
+  left: 40%;
+  top: 10%;
+  background-color: #333 ;
+  color: #fff ;
+  font-weight: bold;
+  border-radius: 3px ;
+  border: 1.2px solid rgb(248, 151, 151);
+}
+
+.custom-snackbar .mat-mdc-button {
+  color: #ffcc00 !important;
+}

@@ -24,8 +24,8 @@
   bottom: 50px;
   right: 50px;
   cursor: pointer;
-  z-index: 10;
   user-select: none;
+  z-index: 1;
 }
 
 .add i{
@@ -89,4 +89,11 @@
     width: 100%;
     padding: 2rem 1rem;
   }
+  .add {
+    scale: 0.8;
+    right: 0;
+    transform: translateY(50px);
+  }
 }
+
+

@@ -8,58 +8,70 @@
     </div>
   </div>
   <div class="content">
-    <p>
-      {{ post.content.length < 200 ? post.content : post.content.slice(0, 200) + '...' }}
-      <button *ngIf="post.content.length > 200" (click)="showDetail.emit(post)" class="showMore">
-        Show More
-      </button>
+    <p  class="ql-editor" [innerHTML]="getExcerptHtml(post.content, 200) " style="white-space: pre-wrap;" (click)="handleExcerptClick($event)">
+
     </p>
+
   </div>
   <div class="interacciones">
-    <button (click)="showLikes()" >
+    <button (click)="showLikes()">
     {{ post.like_count }} Likes
     </button>
     <button (click)="showDetail.emit(post)">{{post.comment_count}} Comments</button>
     <div class="botones" *ngIf="logged">
 
-      <button (click)="giveLike()">
-        <i class="fa-heart" [class.fas]="liked.bool" [class.far]="!liked.bool"></i>
-      </button>
-      <button><i class="fa-regular fa-comment"></i></button>
-       @if (canWrite(post.permissions)) {
-         <button (click)="editing=true"><i class="fa-solid fa-pen-to-square"></i></button>
-         <button (click)="delete()"><i class="fa-solid fa-trash"></i></button>
+      <div class="botons">
+
+        <button (click)="giveLike()">
+          <i class="fa-heart" [class.fas]="liked.bool" [class.far]="!liked.bool"></i>
+        </button>
+        <button (click)="showDetail.emit(post)"><i class="fa-regular fa-comment"></i></button>
+        @if (canWrite(post.permissions)) {
+          <button (click)="editing=true"><i class="fa-solid fa-pen-to-square"></i></button>
+          <button (click)="delete()"><i class="fa-solid fa-trash"></i></button>
         }
+      </div>
     </div>
   </div>
-  <div *ngIf="overlay" class="likes" id="likes-overlay" >
+
+</div>
+
+@if(show){
+
+  <div class="alertBack" (click)="close()"></div>
+
+  <div class="alert" >
+    <div class="alertContent">
+      <h2>Alert!</h2>
+      <p>Are you sure you want to delete: {{post.title}}</p>
+      <button (click)="confirm(post.id)">Confirmar</button>
+      <button (click)="close()">Cerrar</button>
+    </div>
+  </div>
+}
+
+@if(overlay){
+
+  <div class="likes" id="likes-overlay" >
     <ul>
       <li *ngFor="let user of userLikes">{{ user.username }}</li>
     </ul>
+    @if(userLikes && userLikes.length > 0){
 
-      <div class="pagination" *ngIf="userLikes && userLikes.length > 0">
+      <div class="pagination" >
         <button (click)="prevPage()" [disabled]="currentPage === 1">‹</button>
         <span>{{ startIndex() + 1 }}–{{ endIndex() }} of {{ totalLikes }}</span>
         <button (click)="nextPage()" [disabled]="endIndex() >= totalLikes">›</button>
       </div>
 
+    }
   </div>
-</div>
+}
 
-
-<div class="alertBack" *ngIf="show" (click)="close()"></div>
-
-<div class="alert" *ngIf="show">
-  <div class="alertContent">
-    <h2>Alert!</h2>
-    <p>Are you sure you want to delete: {{post.title}}</p>
-    <button (click)="confirm(post.id)">Confirmar</button>
-    <button (click)="close()">Cerrar</button>
-  </div>
-</div>
 
 @if (editing) {
   <app-create
   [post]="post"
+  [editing]="true"
   (close)="closeUpdate()"></app-create>
 }

@@ -7,6 +7,7 @@
   import { postModel } from '../../../modelos/postModel';
   import { likes } from '../../../modelos/likes';
   import { ActivatedRoute } from '@angular/router';
+  import { HttpClientTestingModule } from '@angular/common/http/testing';
   describe('Home', () => {
     let component: Home;
     let fixture: ComponentFixture<Home>;
@@ -62,7 +63,7 @@
       result: []
     }));
       await TestBed.configureTestingModule({
-        imports: [Home, CommonModule],
+        imports: [Home, CommonModule, HttpClientTestingModule],
         providers: [
           {
             provide: GetPost, useValue: getmockPost

@@ -169,7 +169,7 @@ it("should allow write if authenticated >= 2", () => {
   component.logged = true;
   const customPost = {...post, permissions: {
     is_public:1,
-    authenticated: 1,
+    authenticated: 2,
     team:2
   }};
   expect(component.canWrite(customPost.permissions)).toBeTrue();
@@ -189,11 +189,11 @@ it("should allow write if team >= 2 and same team", () => {
 });
 
 it("should not allow write if no condition met", () => {
-  component.logged = true;
-  const customPost = {...post, permissions: {is_public:1,
-    authenticated:2,
-    team:2}};
-  expect(component.canWrite(customPost.permissions)).toBeFalse();
+  component.logged = false;
+  const customPost = {...post, permissions: {is_public:0,
+    authenticated:0,
+    team:0}};
+  expect(component.canWrite(customPost.permissions)).toBeFalsy();
 });
 
   it('should delete post and show snackbar on success', fakeAsync(() => {

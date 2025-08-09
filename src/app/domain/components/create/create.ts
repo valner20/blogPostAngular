@@ -8,13 +8,14 @@ import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-create',
-  imports: [ReactiveFormsModule,MatSnackBarModule, QuillModule],
+  imports: [ReactiveFormsModule, MatSnackBarModule, QuillModule],
   templateUrl: './create.html',
   styleUrl: './create.css'
 })
 export class Create {
   constructor(private snackbar: MatSnackBar){
   }
+  @Input() editing: boolean = false
   @Input() post?: postModel
   service = inject(GetPost)
   builder = inject(FormBuilder);
@@ -101,10 +102,12 @@ setValues(){
   submit(){
     if(this.form.valid){
         const data = this.form.getRawValue() as postCreation;
-        this.service.sendPost(data).subscribe({
-        next: () => {
-          this.snackbar.open('Post created.', 'close', {
-          duration: 2000,
+        data.content = data.content.replace(/<p><\/p>/g, '<p>&nbsp;</p>');
+
+        this.service.sendPost(data, this.editing? this.post!.id: undefined).subscribe({
+          next: () => {
+            this.snackbar.open('Post created.', 'close', {
+              duration: 2000,
           verticalPosition: "top"
         });
 
@@ -112,15 +115,17 @@ setValues(){
           this.reloadPage()
         }, 2000);
 
-    },
-        error: () => {
-          this.snackbar.open('Post could not be created.', 'close', {
+      },
+      error: () => {
+        this.snackbar.open('Post could not be created.', 'close', {
           duration: 2000,
           verticalPosition: "top"})
         }
 
       })
     }
+
+
   }
 
   reloadPage(){
@@ -128,44 +133,44 @@ setValues(){
 
   }
 
-quillConfig = {
-    toolbar: {
-      container: [
-        ['bold', 'italic', 'underline', 'strike'],
 
-        ['blockquote', 'code-block'],
+  quillConfig = {
+      toolbar: {
+        container: [
+          ['bold', 'italic', 'underline', 'strike'],
 
+          [{ 'header': [1, 2, 3, false] }],
 
-        [{ 'header': [1, 2, 3, false] }],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
 
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          [{ 'indent': '-1'}, { 'indent': '+1' }],
 
-        [{ 'indent': '-1'}, { 'indent': '+1' }],
+          [{ 'script': 'sub'}, { 'script': 'super' }],
+          [{ 'direction': 'rtl' }],
 
-        [{ 'script': 'sub'}, { 'script': 'super' }],
-        [{ 'direction': 'rtl' }],
+          [{ 'align': [] }],
 
-        [{ 'align': [] }],
+          [{ 'color': [] }, { 'background': [] }],
 
-        [{ 'color': [] }, { 'background': [] }],
+          [{ 'size': ['small', false, 'large', 'huge'] }],
+          [{ 'font': [] }],
 
-        [{ 'size': ['small', false, 'large', 'huge'] }],
-        [{ 'font': [] }],
+          ['link'],
+          ['clean']
+        ],
 
-        ['link'],
-        ['clean']
-      ],
-
-    },
-    theme: 'snow',
-    placeholder: 'Write your post content here...',
-    bounds: '#editor-container',
-    modules: {
-      clipboard: {
-        matchVisual: false
+      },
+      theme: 'snow',
+      placeholder: 'Write your post content here...',
+      bounds: '#editor-container',
+      modules: {
+        clipboard: {
+          matchVisual: false
+        }
       }
-    }
-  };
+    };
+
+
 
 
 
