@@ -17,7 +17,8 @@ describe('Login', () => {
     refresh: 'refresh-token',
     username: 'nombresito',
     team :"def",
-    staff :"true"
+    staff :"true",
+    role:""
   };
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -62,10 +63,10 @@ describe('Login', () => {
   })
 
   it("should not get token when the request is sended", () => {
-    service.login(data)
+    service.login(data).subscribe()
     const req = mock.expectOne("http://127.0.0.1:8000/api/token/")
     expect (req.request.method).toEqual("POST")
-    expect(req.request.body).toBeFalsy()
+    expect(req.request.headers.has("Authorization")).toBeFalse();
   } )
 
 });

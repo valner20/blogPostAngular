@@ -19,8 +19,14 @@
             placeholder="Enter post title..."
           />
           @if (form.get('title')?.touched && form.get('title')?.invalid) {
+            @if (form.get("title")?.errors?.["maxlength"]) {
+
+              <small class="error">Title must be under 200 characteres</small>
+            }
+            @if (form.get("title")?.errors?.["required"]) {
+
             <small class="error">Title is required</small>
-          }
+          }}
         </div>
       </div>
 
@@ -92,12 +98,25 @@
           </div>
         </div>
       </div>
+       <div class="permission-card">
+    <div class="form-group">
+      <label for="owner">Owner</label>
+      <div class="input-wrapper">
+        <input
+          id="owner"
+          type="text"
+          value="read_and_write"
+          disabled
+        />
+      </div>
+    </div>
+  </div>
 
       <div class="buttons">
         <button type="button" class="btn-secondary" (click)="onClose()">
           Cancel
         </button>
-        <button type="submit" class="btn-primary" [disabled]="form.invalid">
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || submiding">
           Publish Post
         </button>
       </div>

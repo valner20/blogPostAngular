@@ -43,7 +43,7 @@ describe('GetLikes Service', () => {
   });
 
   it('should get likes', () => {
-    service.loadAll().subscribe((res: pagination<likes>) => {
+    service.loadLikesPag(1).subscribe((res: pagination<likes>) => {
       expect(res.total_count).toBe(1);
       expect(res.result.length).toBe(1);
       expect(res.result[0].user).toBe(1);
@@ -52,20 +52,20 @@ describe('GetLikes Service', () => {
 
     });
 
-    const req = httpMock.expectOne('http://127.0.0.1:8000/likes/');
+    const req = httpMock.expectOne('http://127.0.0.1:8000/likes/?post=1');
     expect(req.request.method).toBe('GET');
     req.flush(mockData);
   });
 
   it('should handle error server', () => {
-    service.loadAll().subscribe({
+    service.loadLikesPag(1).subscribe({
       next: () => fail('No debería pasar por next'),
       error: (error: any) => {
         expect(error.status).toBe(500);
       }
     });
 
-    const req = httpMock.expectOne('http://127.0.0.1:8000/likes/');
+    const req = httpMock.expectOne('http://127.0.0.1:8000/likes/?post=1');
     req.flush('Error del servidor', { status: 500, statusText: 'Server Error' });
   });
 
@@ -89,7 +89,7 @@ it('should get paginated likes when page is not provided', () => {
   const req = httpMock.expectOne('http://127.0.0.1:8000/likes/?post=101');
   expect(req.request.method).toBe('GET');
   req.flush(mockData);
-}); 
+});
 
 });
 

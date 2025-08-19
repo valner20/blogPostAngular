@@ -32,7 +32,7 @@
   }
   @if(comments.length > 0){
     <div class="pagination" >
-      <button (click)="prevPage()" [disabled]="currentPage === 1">‹</button>
+      <button (click)="prevPage()" [disabled]="currentPage === 1 || submiting">‹</button>
       <span>{{ startIndex() + 1 }}–{{ endIndex() }} of {{ totalComments }}</span>
       <button (click)="nextPage()" [disabled]="endIndex() >= totalComments">›</button>
     </div>
@@ -43,10 +43,10 @@
       <h2>Add New Comment:</h2>
       <div class="input">
 
-        <input [(ngModel)]="comment" type="text">
+        <textarea [(ngModel)]="comment" type="text"> </textarea>
       </div>
       <div class="buttons">
-        <button (click)="send()" [disabled]="!comment.trim()">submit</button>
+        <button (click)="send()" [disabled]="!comment.trim() || submiting">submit</button>
         <button (click)="cancel()">Cancel</button>
       </div>
     </div>

@@ -1,6 +1,8 @@
 <app-navbar
   [logged]="logged()"
   [username]="username"
+
+  [disable]="disable"
   (logout)="logout()"
   [logouted]="logouted"
 ></app-navbar>
@@ -24,9 +26,12 @@
 
   </div>
 </div>
-<div class="add" (click)="sendPost()">
+@if (logged()) {
+
+  <div class="add" (click)="sendPost()">
     <i class="fas fa-pen fa-4x"></i>
-</div>
+  </div>
+}
 
 <app-post-detail *ngIf="modal" [post]="modal" [logged]="logged()" (close)="closeModal()"></app-post-detail>
 

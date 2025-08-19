@@ -8,7 +8,8 @@ describe('Register', () => {
   let mockData:register = {
     username: "nombre",
     email: "email@gomali",
-    password: "1234"
+    password: "1234",
+    teams:""
   }
   beforeEach(() => {
     TestBed.configureTestingModule({

@@ -1,4 +1,4 @@
-  import { ComponentFixture, TestBed } from '@angular/core/testing';
+  import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
   import { of } from 'rxjs';
   import { Home } from './home';
   import { GetPost } from '../../../services/getPost/get-post';
@@ -8,11 +8,20 @@
   import { likes } from '../../../modelos/likes';
   import { ActivatedRoute } from '@angular/router';
   import { HttpClientTestingModule } from '@angular/common/http/testing';
+  import { LoginService } from '../../../services/login-logout/login-logout';
+  import { MatSnackBar } from '@angular/material/snack-bar';
+  import { throwError } from 'rxjs';
+  import { Location } from '@angular/common';
+
   describe('Home', () => {
     let component: Home;
     let fixture: ComponentFixture<Home>;
     let getmockPost: jasmine.SpyObj<GetPost>
+    let mockLoginService: jasmine.SpyObj<LoginService>;
     let getmockLikes: jasmine.SpyObj<GetLikes>
+    let mockLocation: jasmine.SpyObj<Location>;
+    let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
+    let mockActivatedRoute: any;
     const mockPost: postModel[]= [
       {
               id: 10,
@@ -44,8 +53,18 @@
     ];
 
     beforeEach(async () => {
-      getmockPost = jasmine.createSpyObj('GetPost', ['load']);
+      getmockPost = jasmine.createSpyObj('GetPost', ['load', "loadPost"]);
       getmockLikes = jasmine.createSpyObj('GetLikes', ['loadAll', 'likesPerUser']);
+      mockLoginService = jasmine.createSpyObj('LoginService', ['logout']);
+      mockLocation = jasmine.createSpyObj('Location', ['go']);
+      mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
+
+      mockActivatedRoute = {
+      paramMap: of({
+        get: jasmine.createSpy('get').and.returnValue(null)
+      })
+      };
+
       getmockPost.load.and.returnValue(of({
       current: 1,
       total: 1,
@@ -71,26 +90,17 @@
           {
             provide: GetLikes, useValue: getmockLikes
           },
-          {
-          provide: ActivatedRoute,
-            useValue: {
-            snapshot: {
-              params: {},
-              queryParams: {}
-            },
-            params: of({}),
-            queryParams: of({}),
-            paramMap: of({
-              get: (key: string) => null
-            })
-          }
-        }
+          { provide: LoginService, useValue: mockLoginService },
+        { provide: Location, useValue: mockLocation },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+          { provide: ActivatedRoute, useValue: mockActivatedRoute }
         ]
       })
       .compileComponents();
 
       fixture = TestBed.createComponent(Home);
       component = fixture.componentInstance;
+      component.snackbar = mockSnackBar;
       fixture.detectChanges();
     });
 
@@ -98,12 +108,54 @@
       expect(component).toBeTruthy();
     });
 
+
+    it('should show snackbar when loadPost fails', fakeAsync(() => {
+      getmockPost.load.and.returnValue(throwError(() => new Error('Network error')));
+      component.loadPost(1);
+      tick()
+      expect(mockSnackBar.open).toHaveBeenCalled();
+    }));
+
+    it('should show snackbar when postsLiked fails', () => {
+      component.posts = mockPost;
+      getmockLikes.likesPerUser.and.returnValue(throwError(() => new Error('Likes error')));
+
+      component.postsLiked();
+
+      expect(mockSnackBar.open).toHaveBeenCalled();
+    });
+
+
     it('should clean localStorage when logout is called', () => {
       spyOn(localStorage, 'clear');
+      mockLoginService.logout.and.returnValue(of({}))
       component.logout();
       expect(localStorage.clear).toHaveBeenCalled();
+
+
       expect(component.logged()).toBeFalse();
     });
+
+
+    it('should handle logout error', fakeAsync(() => {
+      mockLoginService.logout.and.returnValue(throwError(() => new Error('Logout error')));
+
+      component.logout();
+      tick();
+
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        'could not logout, server error.',
+        'close',
+        jasmine.objectContaining({
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar-error']
+        })
+      );
+      tick(3000);
+      expect(component.disable).toBeFalse();
+    }));
+
 
     it('should load posts correctly', () => {
       component.loadPost(1);
@@ -161,4 +213,183 @@
       component.postsLiked();
       expect(component.finished).toBeTrue();
     });
+
+
+    describe('Logout Success', () => {
+    beforeEach(() => {
+      spyOn(localStorage, 'clear');
+      spyOn(localStorage, 'getItem').and.returnValue('mock-token');
+    });
+
+    it('should handle successful logout', () => {
+      mockLoginService.logout.and.returnValue(of({}));
+      component.logged.set(true);
+
+      component.logout();
+
+      expect(component.disable).toBeTrue();
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        'logout succesfully.',
+        'close',
+        jasmine.objectContaining({
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
+        })
+      );
+      expect(component.logouted).toBeTrue();
+      expect(localStorage.clear).toHaveBeenCalled();
+      expect(component.logged()).toBeFalse();
+    });
   });
+
+  describe('Pagination', () => {
+    beforeEach(() => {
+      component.currentPage = 2;
+      component.totalPages = 5;
+    });
+
+    it('should go to next page when nextPage is called and not on last page', () => {
+      spyOn(component, 'loadPost');
+
+      component.nextPage();
+
+      expect(component.loadPost).toHaveBeenCalledWith(3);
+    });
+
+    it('should not go to next page when already on last page', () => {
+      component.currentPage = 5;
+      spyOn(component, 'loadPost');
+
+      component.nextPage();
+
+      expect(component.loadPost).not.toHaveBeenCalled();
+    });
+
+    it('should go to previous page when prevPage is called and not on first page', () => {
+      spyOn(component, 'loadPost');
+
+      component.prevPage();
+
+      expect(component.loadPost).toHaveBeenCalledWith(1);
+    });
+
+    it('should not go to previous page when already on first page', () => {
+      component.currentPage = 1;
+      spyOn(component, 'loadPost');
+
+      component.prevPage();
+
+      expect(component.loadPost).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Index Calculations', () => {
+    beforeEach(() => {
+      component.currentPage = 2;
+      component.pageSize = 10;
+      component.totalPost = 25;
+    });
+
+    it('should calculate startIndex correctly', () => {
+      const startIndex = component.startIndex();
+      expect(startIndex).toBe(10);
+    });
+
+    it('should calculate endIndex correctly when not on last page', () => {
+      const endIndex = component.endIndex();
+      expect(endIndex).toBe(20);
+    });
+
+    it('should calculate endIndex correctly when on last page', () => {
+      component.currentPage = 3;
+      const endIndex = component.endIndex();
+      expect(endIndex).toBe(25);
+    });
+  });
+
+  describe('Modal Management', () => {
+    it('should update location when showPostDetail is called with post', () => {
+      const post = mockPost[0];
+
+      component.showPostDetail(post);
+
+      expect(component.modal).toBe(post);
+      expect(mockLocation.go).toHaveBeenCalledWith(`/home/${post.id}`);
+    });
+
+    it('should not update location when showPostDetail is called with null', () => {
+      component.showPostDetail(null);
+
+      expect(component.modal).toBeNull();
+      expect(mockLocation.go).not.toHaveBeenCalled();
+    });
+
+    it('should load posts when closeModal is called and no posts exist', () => {
+      component.posts = [];
+      spyOn(component, 'loadPost');
+
+      component.closeModal();
+
+      expect(component.loadPost).toHaveBeenCalledWith(1);
+      expect(mockLocation.go).toHaveBeenCalledWith("/home");
+    });
+
+    it('should not load posts when closeModal is called and posts exist', () => {
+      component.posts = mockPost;
+      spyOn(component, 'loadPost');
+
+      component.closeModal();
+
+      expect(component.loadPost).not.toHaveBeenCalled();
+      expect(mockLocation.go).toHaveBeenCalledWith("/home");
+    });
+  });
+
+  describe('Post Creation', () => {
+    it('should set creating to true when sendPost is called without parameter', () => {
+      component.sendPost();
+      expect(component.creating).toBe(true);
+    });
+
+    it('should set creating to post when sendPost is called with post parameter', () => {
+      const post = mockPost[0];
+      component.sendPost(post);
+      expect(component.creating).toBe(post);
+    });
+
+    it('should set creating to false when closeSendPost is called', () => {
+      component.creating = true;
+      component.closeSendPost();
+      expect(component.creating).toBe(false);
+    });
+  });
+
+  it('should load specific post when id parameter is provided', () => {
+      const testPost = mockPost[0];
+      mockActivatedRoute.paramMap = of({
+        get: jasmine.createSpy('get').and.returnValue('10')
+      });
+      getmockPost.loadPost.and.returnValue(of(testPost));
+      spyOn(component, 'showPostDetail');
+
+      component.ngOnInit();
+
+      expect(getmockPost.loadPost).toHaveBeenCalledWith('10');
+      expect(component.showPostDetail).toHaveBeenCalledWith(testPost);
+    });
+
+  it('should load posts page 1 when no id parameter is provided', () => {
+
+      spyOn(component, 'loadPost');
+
+      component.ngOnInit();
+
+      expect(component.loadPost).toHaveBeenCalledWith(1);
+    });
+
+  });
+
+
+
+

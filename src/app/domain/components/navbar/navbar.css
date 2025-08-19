@@ -12,6 +12,12 @@
   height: 6.2rem;
 }
 
+.rayita {
+  height: 50px;
+  width: 1px;
+  background-color: white;
+}
+
 .links {
   display: flex;
   position: absolute;
@@ -25,12 +31,6 @@
   text-decoration: none;
 }
 
-.rayita {
-  height: 50px;
-  width: 1px;
-  background-color: white;
-}
-
 .username {
   font-size: 2rem;
   font-weight: 500;
@@ -42,6 +42,7 @@
 }
 
 .logout {
+  margin-left: 1.3rem;
   background: none;
   border: 1px solid #92929250;
   color: #fff;

@@ -30,7 +30,9 @@
   flex-direction: column;
   gap: 3rem;
 
+
 }
+
 
 
 .modal button {
@@ -49,6 +51,7 @@
 }
 
 .ql-editor{
+  hyphens: auto;
   line-height: 30px;
 }
 
@@ -64,6 +67,7 @@
   border-radius: 16px;
   color: white;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+
 }
 
 .comments-container h2 {
@@ -105,10 +109,12 @@
 }
 
 .comment-card .content {
+  white-space: pre-wrap;
   font-size: 1rem;
   color: #dddddd;
   line-height: 1.4;
   margin: 0;
+
 }
 
 .pagination span{
@@ -164,7 +170,7 @@
   align-items: center;
 }
 
-.input input {
+.input textarea {
   flex: 1;
   padding: 0.5rem 1rem;
   background-color: #2c2c3e;
@@ -175,14 +181,17 @@
   font-size: 1rem;
 }
 
-.input input::placeholder {
+.input textarea::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
 
 
-.input input:focus{
+.input textarea:focus{
   outline: none;
   border: 1px, solid;
   border-color: #6366f1;
   background: #28293a;
 }
+
+
+

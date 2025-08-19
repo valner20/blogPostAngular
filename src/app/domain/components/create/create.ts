@@ -5,6 +5,38 @@ import { postCreation } from '../../../modelos/postCreation';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { postModel } from '../../../modelos/postModel';
 import { QuillModule } from 'ngx-quill';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+
+export function espacios(control: AbstractControl): ValidationErrors | null {
+  const v = control.value;
+
+  if (v == null) return { empty: true };
+
+  if (typeof v === 'string') {
+    const text = v
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .trim();
+    return text.length ? null : { empty: true };
+  }
+
+    if (typeof v === 'object' && Array.isArray((v as any).ops)) {
+    const text = (v as any).ops
+      .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+      .join('')
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .trim();
+    return text.length ? null : { empty: true };
+  }
+
+  return { empty: true };
+}
 
 @Component({
   selector: 'app-create',
@@ -32,14 +64,14 @@ export class Create {
   is_public = signal(this.isPublicOptions)
   auth = signal(this.permissionOptions)
   teamOptions = signal(this.permissionOptions);
-
+  submiding = false
   form!: FormGroup
   @Output() close = new EventEmitter<void>()
 
 ngOnInit() {
  this.form = this.builder.group({
-    title: [this.post?.title ?? "", [Validators.required]],
-    content: [this.post?.content ?? "", [Validators.required]],
+    title: [this.post?.title ?? "", [Validators.required, Validators.maxLength(200), espacios]],
+    content: [this.post?.content ?? "", [Validators.required, espacios]],
     is_public: [this.post?.permissions?.is_public ?? 1, [Validators.required]],
     authenticated: [this.post?.permissions?.authenticated ?? 2, [Validators.required]],
     team: [this.post?.permissions?.team ?? 2, [Validators.required]],
@@ -96,19 +128,23 @@ setValues(){
 }
 
   onClose(){
+    if(!this.submiding)
     this.close.emit()
   }
 
   submit(){
     if(this.form.valid){
+        this.submiding = true
         const data = this.form.getRawValue() as postCreation;
         data.content = data.content.replace(/<p><\/p>/g, '<p>&nbsp;</p>');
 
         this.service.sendPost(data, this.editing? this.post!.id: undefined).subscribe({
           next: () => {
             this.snackbar.open('Post created.', 'close', {
-              duration: 2000,
-          verticalPosition: "top"
+            duration: 2000,
+            verticalPosition: "top",
+            panelClass: ['custom-snackbar']
+
         });
 
         setTimeout(() => {
@@ -119,7 +155,13 @@ setValues(){
       error: () => {
         this.snackbar.open('Post could not be created.', 'close', {
           duration: 2000,
-          verticalPosition: "top"})
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar-error']
+
+        })
+        setTimeout(()=> {
+          this.submiding=false
+        },1000)
         }
 
       })

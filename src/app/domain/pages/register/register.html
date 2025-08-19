@@ -1,4 +1,5 @@
 <div class="box">
+  <img src="avanzatech.png" alt="">
   <div class="content">
     <form [formGroup]="form" (ngSubmit)="create()" class="maquetado">
       <h2>Register</h2>
@@ -18,31 +19,47 @@
         placeholder="email" />
       <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
         <small *ngIf="form.get('email')?.errors?.['required']">Campo obligatorio</small>
-        <small *ngIf="form.get('email')?.errors?.['email']">Correo no válido</small>
+        <small *ngIf="form.get('email')?.errors?.['pattern']">Correo no válido</small>
         <small *ngIf="form.get('email')?.errors?.['emailError']">El correo ya existe</small>
       </div>
 
-      <input
-        type="password"
-        formControlName="password"
-        placeholder="password" />
-      <div *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
-        <small *ngIf="form.get('password')?.errors?.['required']">Campo obligatorio</small>
-      </div>
+     <div class="input-password">
+  <input
+    [type]="verContrasena ? 'text': 'password'"
+    formControlName="password"
+    placeholder="password" />
 
-      <input
-        type="password"
-        formControlName="confirm"
-        placeholder="confirm password" />
-      <div *ngIf="form.get('confirm')?.touched && form.get('confirm')?.errors?.['required']">
-        <small>Campo obligatorio</small>
-      </div>
-      <div *ngIf="form.errors?.['error'] && form.get('confirm')?.touched">
-        <small>Las contraseñas no coinciden</small>
-      </div>
 
-      <button type="submit"  >Submit</button>
-      <button type="button">Cancel</button>
+    @if(ojitoP){
+    <button id="ojito" type="button" (click)="this.verContrasena = !this.verContrasena" mat-icon-button>
+      <mat-icon>{{ verContrasena ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
+    }
+</div>
+<div *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+  <small *ngIf="form.get('password')?.errors?.['required']">Campo obligatorio</small>
+</div>
+
+<div class="input-password">
+  <input
+    [type]="verContrasena ? 'text': 'password'"
+    formControlName="confirm"
+    placeholder="confirm password" />
+    @if(ojitoC){
+
+      <button id="ojito" type="button" (click)="this.verContrasena = !this.verContrasena" mat-icon-button>
+        <mat-icon>{{ verContrasena ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    }
+</div>
+<div *ngIf="form.get('confirm')?.touched && form.get('confirm')?.errors?.['required']">
+  <small>Campo obligatorio</small>
+</div>
+<div *ngIf="form.errors?.['error'] && form.get('confirm')?.touched">
+  <small>Las contraseñas no coinciden</small>
+</div>
+
+      <button type="submit" [disabled]="form.invalid || submiting">Submit</button>
 
       <div class="confirm">
         <p>Have an account? </p><a [routerLink]="['/login']">Log in</a>

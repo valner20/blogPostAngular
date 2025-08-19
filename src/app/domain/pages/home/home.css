@@ -70,7 +70,7 @@
 
 .pagination button:disabled {
   opacity: 0.3;
-  cursor: default;
+  cursor:not-allowed;
 }
 
 .pagination span {
@@ -93,6 +93,12 @@
     scale: 0.8;
     right: 0;
     transform: translateY(50px);
+  }
+}
+@media (max-height: 900px){
+
+  .scroll{
+    top: 150px;
   }
 }
 

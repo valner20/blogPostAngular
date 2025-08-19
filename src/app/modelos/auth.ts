@@ -4,4 +4,5 @@ export interface auth{
   username: string;
   team:string
   staff: string
+  role: string
 }

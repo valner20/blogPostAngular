@@ -3,7 +3,7 @@ import { postModel } from '../../../modelos/postModel';
 import { GetPost } from '../../../services/getPost/get-post';
 import { CommonModule } from '@angular/common';
 import { GetLikes } from '../../../services/likes/get-likes';
-import {  ActivatedRoute } from '@angular/router';
+import {  ActivatedRoute, Router } from '@angular/router';
 import { PostDetail } from '../../components/post-detail/post-detail';
 import { Post } from '../../components/post/post';
 import { Navbar } from '../../components/navbar/navbar';
@@ -12,6 +12,7 @@ import { Location } from '@angular/common';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { Create } from '../../components/create/create';
 import { LoginService } from '../../../services/login-logout/login-logout';
+import { RegisterService } from '../../../services/register/register';
 @Component({
   selector: 'app-home',
   imports: [Create, CommonModule, PostDetail, Post, Navbar, MatSnackBarModule],
@@ -19,7 +20,7 @@ import { LoginService } from '../../../services/login-logout/login-logout';
   styleUrl: './home.css'
 })
 export class Home {
-
+  router = inject(Router)
   snackbar = inject(MatSnackBar)
   route = inject(ActivatedRoute)
   finished = false
@@ -30,19 +31,32 @@ export class Home {
   logged = signal<boolean>(!!localStorage.getItem("access"));
   username = localStorage.getItem("username");
   location = inject(Location)
-  private likeService = inject(GetLikes);
+  likeService = inject(GetLikes);
   currentPage: number = 1;
   totalPost: number = 0;
   totalPages: number = 0;
   pageSize = 10
+  id= localStorage.getItem("id")
   creating: postModel| boolean = false
   logoutService = inject(LoginService)
   show = false
   logouted = false
+  reload = inject(RegisterService)
+  constructor(){
+    if(this.id)
+    this.reload.id(this.id).subscribe({
+      next: (res) => {
+        localStorage.setItem("username", res.username);
+        localStorage.setItem("team",res.teams!)
+        localStorage.setItem("staff",res.staff!)
+      }
+      })
+  }
 
   loadPost(page: number) {
     this.service.load(page).subscribe({
       next: (data) => {
+
       this.currentPage = data.current
       this.totalPost  = data.total_count
       this.totalPages = data.total
@@ -58,7 +72,7 @@ export class Home {
        this.snackbar.open('No se pudieron cargar los post.', 'Cerrar', {
           duration: 3000,
           verticalPosition: "top",
-            panelClass: ['custom-snackbar']
+            panelClass: ['custom-snackbar-error']
         });
     }
     });
@@ -78,10 +92,11 @@ export class Home {
 
     },
     error: () => {
-        this.snackbar.open("no se pudieron cargar los likes", "cerrar", {duration: 3000, verticalPosition: "top",panelClass: ['custom-snackbar']})
+        this.snackbar.open("no se pudieron cargar los likes", "cerrar", {duration: 3000, verticalPosition: "top",panelClass: ['custom-snackbar-error']})
       }
     })
 }
+
 
   ngOnInit(){
     this.route.paramMap.pipe(
@@ -98,8 +113,30 @@ export class Home {
 
     )
     )
-    .subscribe(data => {
-    if (data) this.showPostDetail(data);    })
+    .subscribe({
+      next: data => {
+    if (data) this.showPostDetail(data);
+
+     },
+    error:(err)=> {
+       if (err.status >= 500 && err.status < 600 || err.status === 0) {
+     // Es un error del servidor
+      this.snackbar.open('Netword error, try again later.', 'Cerrar', {
+      duration: 3000,
+      panelClass: ['custom-snackbar-error']
+
+    });
+    setTimeout(() => {
+      this.router.navigate(["/home"])
+    }, 3000)
+
+  }
+    else{
+      this.router.navigate(["/**"])
+    }
+    }
+
+  })
   }
 
 
@@ -118,8 +155,10 @@ closeModal() {
 
 }
 
+disable = false
 
 logout() {
+  this.disable=true
   this.logoutService.logout()?.subscribe({
     next: ()=>{
        this.snackbar.open('logout succesfully.', 'close', {
@@ -138,9 +177,12 @@ logout() {
       this.snackbar.open('could not logout, server error.', 'close', {
           duration: 3000,
           verticalPosition: "top",
-          panelClass: ['custom-snackbar']
+          panelClass: ['custom-snackbar-error']
         });
-        this.logouted
+        setTimeout(()=>{
+          this.disable = false
+
+        },3000)
     }
   })
 }

@@ -35,34 +35,39 @@ export class Post {
   team = localStorage.getItem("team")
   username = localStorage.getItem("username")
   staff = localStorage.getItem("staff")
-
+  role = localStorage.getItem("role")
+  submiting=false
 
 
 
   giveLike() {
     if (this.liked.bool) {
+      this.submiting = true
       this.likeService.delete(this.liked.id).subscribe(() => {
         this.liked = {id: 0, bool: false};
         this.post.like_count--;
+        this.submiting=false
       });
     } else {
-      this.likeService.post(this.post.id).subscribe((res) => {
-        this.likeService.likesPerUser(this.post.id).subscribe({
-          next: (res) => {
-            if (res.result.length > 0) {
-              this.liked = { id: res.result[0].id, bool: true};
+      this.submiting=true
+      this.likeService.post(this.post.id).subscribe({
+      next: (res) => {
+            if (res) {
+              this.liked = { id: res.id, bool: true};
             }
+            this.submiting=false
+
           },
           error: ()=> {
                this.snackbar.open('like could not be gived, server error.', 'close', {
                duration: 3000,
                verticalPosition: "top",
-               panelClass: ['custom-snackbar']
+               panelClass: ['custom-snackbar-error']
         });
+            this.submiting=false
           }
         });
         this.post.like_count++;
-      });
     }
   }
   @HostListener('document:click', ['$event'])
@@ -96,7 +101,7 @@ export class Post {
       this.snackbar.open('likes could not be loaded.', 'close', {
           duration: 3000,
           verticalPosition: "top",
-          panelClass: ['custom-snackbar']
+          panelClass: ['custom-snackbar-error']
         });
     }
   });
@@ -127,27 +132,34 @@ export class Post {
   }
 
   close(){
-    this.show = false
+      this.show = false;
+
+
   }
   confirm(id: number) {
+    this.submiting=true
     this.service.delete(id).subscribe({
       next: () => {
         this.show = false
         this.snackbar.open('Post Deleted.', 'close', {
-          duration: 2000,
-          verticalPosition: "top"
+          duration: 3000,
+          verticalPosition: "top",
+          panelClass: ['custom-snackbar']
         });
 
         setTimeout(() => {
+        this.submiting=false
           this.reloadPage()
-      }, 2000);
+      }, 3000);
       },
       error: () => {
         this.snackbar.open('Post could not be deleted.', 'close', {
           duration: 3000,
           verticalPosition: "top",
-          panelClass: ['custom-snackbar']
+          panelClass: ['custom-snackbar-error']
         });
+        this.submiting=false
+
       }
     })
   }
@@ -155,11 +167,12 @@ export class Post {
 
   canWrite(permission: {is_public: number, authenticated: number, team:number} ){
     if(!this.logged) return false
-
+    if(this.role=== "admin")return true
+    if(this.staff === "true") return true
     if(permission.authenticated==2){
       return true
     }
-    if(permission.team ==2 && this.username === this.post.author){
+    if(permission.team == 2 && this.team === this.post.author_team || this.username === this.post.author){
      return true
     }
     return false
@@ -167,7 +180,6 @@ export class Post {
 
   reloadPage(){
     window.location.reload();
-
   }
 
   closeUpdate(){
@@ -186,17 +198,40 @@ getExcerptHtml(html: string, limit: number = 200): SafeHtml {
   if (fullText.length <= limit) {
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
-  const truncatedText = fullText.slice(0, limit) + '...';
 
-  const wrapper = document.createElement('div');
-  wrapper.textContent = truncatedText;
+  let truncated = '';
+  let length = 0;
 
-  const button = document.createElement('button');
-  button.innerText = 'Show More';
-  button.className = 'showMore';
-  wrapper.appendChild(button);
+  function traverse(node: Node) {
+    if (length >= limit) return;
 
-  return this.sanitizer.bypassSecurityTrustHtml(wrapper.innerHTML);
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || '';
+      if (length + text.length > limit) {
+        truncated += text.slice(0, limit - length) + '...';
+        truncated += ` <button class="showMore" style="display:inline;">Show More</button>`;
+        length = limit;
+      } else {
+        truncated += text;
+        length += text.length;
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as HTMLElement;
+      const tag = el.tagName.toLowerCase();
+
+      const attrs = Array.from(el.attributes)
+        .map(attr => `${attr.name}="${attr.value}"`)
+        .join(' ');
+
+      truncated += `<${tag}${attrs ? ' ' + attrs : ''}>`;
+      node.childNodes.forEach(traverse);
+      truncated += `</${tag}>`;
+    }
+  }
+
+  div.childNodes.forEach(traverse);
+
+  return this.sanitizer.bypassSecurityTrustHtml(truncated);
 }
 
   handleExcerptClick(event: MouseEvent) {

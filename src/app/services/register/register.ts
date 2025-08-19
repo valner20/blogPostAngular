@@ -10,4 +10,8 @@ export class RegisterService {
   register(data: register ){
     return this.http.post<register>(this.url,data)
   }
+  id(id:string){
+    return this.http.get<register>(this.url+id+"/")
+  }
+
 }

@@ -1,5 +1,6 @@
 
 <div class="box">
+  <img src="avanzatech.png" alt="">
   <div class="content">
     <form [formGroup]="form" (ngSubmit)="login()" class="maquetado">
       <h2>Login</h2>
@@ -16,7 +17,9 @@
         [type]="verContrasena ? 'text': 'password'"
         formControlName="password"
         placeholder="password" />
-        <button type="button" (click)="contrasena()" mat-icon-button> <mat-icon>{{ verContrasena ? 'visibility_off' : 'visibility' }}</mat-icon> </button>
+        @if(ojito){
+          <button id="ojito" type="button" (click)="contrasena()" mat-icon-button> <mat-icon>{{ verContrasena ? 'visibility_off' : 'visibility' }}</mat-icon> </button>
+        }
       </div>
 
       <div *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
@@ -26,8 +29,8 @@
         <small *ngIf="cantlog">Correo o contraseña  incorrectos</small>
         <small *ngIf="serverStuck">Ocurrio algo inesperado </small>
       </div>
-      <button type="submit" [disabled]="form.invalid">Submit</button>
-      <button type="button">Cancel</button>
+      
+      <button type="submit" [disabled]="form.invalid || submiding" class="enviar">Submit</button>
       <div class="confirm">
         <p>Don't have an account?</p><a [routerLink]="['/registrar']">Register</a>
       </div>

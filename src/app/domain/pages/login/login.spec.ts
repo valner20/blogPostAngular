@@ -1,5 +1,5 @@
   import { HttpClientTestingModule } from '@angular/common/http/testing';
-  import { ComponentFixture, TestBed } from '@angular/core/testing';
+  import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
   import { of, throwError } from 'rxjs';
   import { ReactiveFormsModule } from '@angular/forms';
   import { Login } from './login';
@@ -55,7 +55,8 @@
         refresh:"aaa",
         username:"ada",
         team:"ad",
-        staff:""
+        staff:"",
+        role:""
       }))
       component.login();
       expect(service.login).toHaveBeenCalledWith({ email: "avanzatechsito@gmail.com", password: "1234" });
@@ -103,8 +104,10 @@
 
       })
 
-    it("should chance between password and text", () => {
-      const passwordInput: HTMLInputElement = fixture.nativeElement.querySelector('input[formControlName="password"]');
+    it("should chance between password and text",() => {
+      component.form.controls.password.setValue("1234")
+      component.ngOnInit
+  fixture.detectChanges();      const passwordInput: HTMLInputElement = fixture.nativeElement.querySelector('input[formControlName="password"]');
       const toggleButton = fixture.nativeElement.querySelector('button');
 
       expect(passwordInput.type).toBe('password');

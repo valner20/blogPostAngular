@@ -32,9 +32,7 @@ export class GetLikes {
     return this.service.get<pagination<likes>>(`${this.url}?post=${idPost}`)
   }
 
-  loadAll(){
-    return this.service.get<pagination<likes>>(this.url);
-  }
+
 
     post(id:number){
     return this.service.post<likes>(this.url, {post: id});

@@ -6,13 +6,14 @@ import { GetLikes } from '../../../services/likes/get-likes';
 import { of } from 'rxjs';
 import { postFinal } from '../../../modelos/postModel';
 import { GetPost } from '../../../services/getPost/get-post';
-
+import { throwError } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 describe('Post', () => {
   let component: Post;
   let fixture: ComponentFixture<Post>;
   let service: jasmine.SpyObj<GetLikes>
   let postService: jasmine.SpyObj<GetPost>
-
+  let snackbar: jasmine.SpyObj<MatSnackBar>
 
   let post: postFinal = {
     id:1,
@@ -34,11 +35,15 @@ describe('Post', () => {
   beforeEach(async () => {
     service = jasmine.createSpyObj('GetLikes', ['delete', 'post', 'likesPerUser', 'loadLikesPag']);
     postService = jasmine.createSpyObj('GetPost', ['delete']);
+    snackbar= jasmine.createSpyObj("MatSnackBar", ["open"])
     await TestBed.configureTestingModule({
       imports: [Post, CommonModule],
       providers: [{provide: GetLikes, useValue: service},
         {
           provide: GetPost, useValue: postService
+        },
+        {
+          provide: MatSnackBar, useValue: snackbar
         }
       ]
     })
@@ -48,6 +53,7 @@ describe('Post', () => {
     component = fixture.componentInstance;
     component.post = structuredClone(post)
     component.liked = { id: 1, bool: true };
+    component.snackbar = snackbar
     fixture.detectChanges();
   });
 
@@ -71,18 +77,10 @@ describe('Post', () => {
       user: 1,
       username:"brey"
     }));
-    service.likesPerUser.and.returnValue(of({
-      current: 1,
-      total_count: 1,
-      total:1,
-      next: null,
-      previous: null,
-      result: [{ id: 99, post: 1, user:1, username:"brey"}]
-    }));
+
 
     component.giveLike();
     expect(service.post).toHaveBeenCalledWith(1);
-    expect(service.likesPerUser).toHaveBeenCalledWith(1);
     expect(component.liked.bool).toBe(true);
     expect(component.post.like_count).toBe(2);
   });
@@ -165,7 +163,7 @@ it("should allow write if user is author", () => {
   localStorage.removeItem("username");
 });
 
-it("should allow write if authenticated >= 2", () => {
+it("should allow write if authenticated == 2", () => {
   component.logged = true;
   const customPost = {...post, permissions: {
     is_public:1,
@@ -175,7 +173,7 @@ it("should allow write if authenticated >= 2", () => {
   expect(component.canWrite(customPost.permissions)).toBeTrue();
 });
 
-it("should allow write if team >= 2 and same team", () => {
+it("should allow write if team == 2 and same team", () => {
   component.logged = true;
   localStorage.setItem("team", "avanzatech");
   const customPost = post;
@@ -198,14 +196,13 @@ it("should not allow write if no condition met", () => {
 
   it('should delete post and show snackbar on success', fakeAsync(() => {
   const deleteSpy = spyOn(component as any, 'reloadPage');
-  spyOn(component['snackbar'], 'open');
   postService.delete.and.returnValue(of({}));
 
   component.confirm(1);
-  tick(2000);
+  tick(3000);
 
   expect(component['service'].delete).toHaveBeenCalledWith(1);
-  expect(component['snackbar'].open).toHaveBeenCalledWith('Post Deleted.', 'close', jasmine.any(Object));
+  expect(component['snackbar'].open).toHaveBeenCalled();
   expect(deleteSpy).toHaveBeenCalled();
 }));
 
@@ -220,6 +217,57 @@ it("should close modal when close() is called", () => {
   expect(component.show).toBeFalse();
 });
 
+  it('should show snackbar when loadLikes fails',fakeAsync( () => {
+    service.loadLikesPag.and.returnValue(throwError(()=>new Error()))
+    component.loadLikes();
+    tick()
+
+    expect(snackbar.open).toHaveBeenCalled();
+  }));
+
+  it('should show snackbar when delete fails in confirm', () => {
+    postService.delete.and.returnValue(throwError(() => new Error("fail")))
+
+    component.confirm(1);
+
+    expect(snackbar.open).toHaveBeenCalled()
+  });
+
+    it('should set editing to false when closeUpdate is called', () => {
+    component.editing = true;
+    component.closeUpdate();
+    expect(component.editing).toBeFalse();
+  });
+
+   it('should emit showDetail when handleExcerptClick is called with showMore', () => {
+    const event = { target: document.createElement('button') } as any;
+    event.target.classList.add('showMore');
+    const emitSpy = spyOn(component.showDetail, 'emit');
+
+    component.handleExcerptClick(event);
+
+    expect(emitSpy).toHaveBeenCalled();
+  });
+
+    it('should not emit showDetail when handleExcerptClick target has no showMore class', () => {
+    const event = { target: document.createElement('button') } as any;
+    const emitSpy = spyOn(component.showDetail, 'emit');
+
+    component.handleExcerptClick(event);
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+
+it("should show likes and open the overlay", () => {
+  component.overlay = false;
+  service.loadLikesPag.and.returnValue(of({
+    current: 1, total_count: 1, total: 1, next: null, previous: null, result: []
+  }));
+  component.showLikes();
+  expect(service.loadLikesPag).toHaveBeenCalledWith(1, 1);
+  expect(component.overlay).toBeTrue();
+});
 
 
 });

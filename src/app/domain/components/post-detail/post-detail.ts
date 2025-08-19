@@ -26,6 +26,7 @@ export class PostDetail {
   comment: string = ""
   empty: boolean = false
   snackbar = inject(MatSnackBar)
+  submiting =false
 
   ngOnInit(){
     this.loadComments(1)
@@ -43,13 +44,15 @@ export class PostDetail {
         this.totalComments = data.total_count
         this.totalPages = data.total
         this.comments = data.result
+        this.submiting=false
       },
       error: () => {
         this.snackbar.open('could not load comments.', 'close', {
           duration: 3000,
           verticalPosition: "top",
-          panelClass: ['custom-snackbar']
+          panelClass: ['custom-snackbar-error']
         });
+      this.submiting=false
       }
     })
   }
@@ -57,12 +60,14 @@ export class PostDetail {
 
    nextPage() {
     if (this.currentPage < this.totalPages) {
+      this.submiting=true
       this.loadComments(this.currentPage + 1);
     }
   }
 
   prevPage() {
     if (this.currentPage > 1) {
+      this.submiting=true
       this.loadComments(this.currentPage - 1);
     }
   }
@@ -77,7 +82,7 @@ export class PostDetail {
 
   send(){
     if(this.comment.length > 0){
-
+      this.submiting=true
       this.service.send(this.post.id, this.comment).subscribe({
         next: ()=>{
           this.comment = ""
@@ -86,15 +91,19 @@ export class PostDetail {
             verticalPosition: "top",
             panelClass: ['custom-snackbar']
           });
-          this.loadComments(1)
+          this.loadComments(this.currentPage)
           this.post.comment_count++;
         },
         error: () => {
           this.snackbar.open('comment could not be created.', 'close', {
           duration: 3000,
           verticalPosition: "top",
-          panelClass: ['custom-snackbar']
+          panelClass: ['custom-snackbar-error']
         });
+        setTimeout(()=>{
+
+          this.submiting=false
+        },1500)
         }
        })
     }

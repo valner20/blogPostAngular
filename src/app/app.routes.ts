@@ -1,27 +1,33 @@
 import { Routes } from '@angular/router';
-import { Register } from './domain/pages/register/register';
-import { Login } from './domain/pages/login/login';
-import { Home } from './domain/pages/home/home';
 import { guardGuard } from './guard/guard-guard';
+
 export const routes: Routes = [
-
   {
-    path: "registrar",
-    component:Register,
-    canActivate: [guardGuard]
+    path: 'registrar',
+    canActivate: [guardGuard],
+    loadComponent: () =>
+      import('./domain/pages/register/register').then(m => m.Register)
   },
   {
-    path: "login",
-    component:Login,
-    canActivate: [guardGuard]
-
+    path: 'login',
+    canActivate: [guardGuard],
+    loadComponent: () =>
+      import('./domain/pages/login/login').then(m => m.Login)
   },
   {
-    path: "home",
-    component: Home
+    path: 'home',
+    loadComponent: () =>
+      import('./domain/pages/home/home').then(m => m.Home)
   },
   {
-  path: "home/:id",
-  component: Home
+    path: 'home/:id',
+    loadComponent: () =>
+      import('./domain/pages/home/home').then(m => m.Home)
+  },
+ 
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./domain/pages/not-found/not-found').then(m => m.NotFound)
   }
 ];
